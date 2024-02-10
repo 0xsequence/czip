@@ -3,7 +3,6 @@ module github.com/0xsequence/compressor/encoder
 go 1.18
 
 require github.com/0xsequence/ethkit v1.22.1
-
 require github.com/0xsequence/go-sequence v0.25.1
 
 require (

@@ -13,6 +13,12 @@
   read_storage_slots           // 0x05
   decompress_transaction       // 0x06
   decompress_many_transactions // 0x07
+  execute_call                 // 0x08
+  execute_call_return          // 0x09
+  execute_many_calls           // 0x0a
+  decode_call                  // 0x0b
+  decode_many_calls            // 0x0c
+  decode_any                   // 0x0d
 }
 
 #define macro MAIN() = takes (0) returns (0) {
@@ -63,30 +69,50 @@
     return
 
   decompress_transaction:
-    0x01                         // [rindex]
-    [FMS]                        // [windex, rindex]
-
-    READ_FULL_EXECUTE(nrfs)      // [windex, rindex]
-
-    [FMS]                        // [FMS, windex, rindex]
-    swap1                        // [windex, FMS, rindex]
-    sub                          // [(windex - FMS), rindex]
-
-    [FMS]                        // [FMS, (windex - FMS), rindex]
-    return                       // [rindex]
+    PRE_DECODE_ONLY()            // [windex, rindex]
+    DECODE_FULL_EXECUTE(nrfs)    // [windex, rindex]
+    POST_DECODE_ONLY()
 
   decompress_many_transactions:
-    0x01                          // [rindex]
-    [FMS]                         // [windex, rindex]
+    PRE_DECODE_ONLY()               // [windex, rindex]
+    DECODE_MANY_FULL_EXECUTES(nrfs) // [windex, rindex]
+    POST_DECODE_ONLY()
 
-    READ_MANY_FULL_EXECUTES(nrfs) // [windex, rindex]
+  execute_call:
+    0x01                         // [rindex]
+    PERFORM_CALL(nrfs)           // [rindex]
+    callvalue callvalue return
 
-    [FMS]                         // [FMS, windex, rindex]
-    swap1                         // [windex, FMS, rindex]
-    sub                           // [(windex - FMS), rindex]
+  execute_call_return:
+    0x01                         // [rindex]
+    PERFORM_CALL(nrfs)           // [rindex]
 
-    [FMS]                         // [FMS, (windex - FMS), rindex]
-    return                        // [rindex]
+    returndatasize               // [returnDataSize, rindex]
+    callvalue                    // [0, returnDataSize, rindex]
+    callvalue                    // [0, 0, returnDataSize, rindex]
+    returndatacopy               // [rindex]
+
+    returndatasize callvalue return
+
+  execute_many_calls:
+    0x01                         // [rindex]
+    PERFORM_MANY_CALLS(nrfs)     // [rindex, size, i]
+    callvalue callvalue return
+  
+  decode_call:
+    PRE_DECODE_ONLY()       // [windex, rindex]
+    DECODE_CALL(nrfs)       // [windex, rindex]
+    POST_DECODE_ONLY()
+
+  decode_many_calls:
+    PRE_DECODE_ONLY()       // [windex, rindex]
+    DECODE_MANY_CALLS(nrfs) // [windex, rindex]
+    POST_DECODE_ONLY()
+
+  decode_any:
+    PRE_DECODE_ONLY()       // [windex, rindex]
+    DECODE_ANY(nrfs)        // [windex, rindex]
+    POST_DECODE_ONLY()
 
   // This will be appended at the end
   // unreachable code as all the method return first
@@ -95,9 +121,150 @@
   FN_READ_FLAG(nrfs)
 }
 
+#define macro PRE_DECODE_ONLY() = takes (0) returns (2) {
+  // input stack: []
 
+  0x01                // [rindex]
+  [FMS]               // [windex, rindex]
 
-#define macro READ_FULL_EXECUTE(nrfs) = takes (2) returns (2) {
+  // output stack: [windex, rindex]
+}
+
+#define macro POST_DECODE_ONLY() = takes (2) returns (0) {
+  // input stack: [windex, rindex]
+
+  [FMS]               // [FMS, windex, rindex]
+  swap1               // [windex, FMS, rindex]
+  sub                 // [(windex - FMS), rindex]
+
+  [FMS]               // [FMS, (windex - FMS), rindex]
+  return              // [rindex]
+
+  // output stack: [windex, rindex]
+}
+
+#define macro PERFORM_READ_SLOTS() = takes (0) returns (1) {
+  // input stack: []
+
+  0x01          // [0x01]
+  dup1          // [rindex, 0x01]
+  callvalue     // [windex, rindex, 0x01]
+
+  read_another:
+    dup2          // [rindex, windex, rindex]
+    calldataload  // [data[rindex], windex, rindex]
+    sload         // [sload[data[rindex]], windex, rindex]
+    dup2          // [windex, sload[data[rindex]], windex, rindex]
+    mstore        // [windex, rindex]
+
+    0x20          // [0x20, windex, rindex]
+    swap2         // [rindex, windex, 0x20]
+    dup3          // [0x20, rindex, windex, 0x20]
+    add           // [(0x20 + rindex), windex, 0x20]
+    swap2         // [0x20, windex, (0x20 + rindex)]
+    add           // [(0x20 + windex), (0x20 + rindex)]
+
+    calldatasize        // [size, (0x20 + windex), (0x20 + rindex)]
+    dup3                // [(0x20 + rindex), size, (0x20 + windex), (0x20 + rindex)]
+    lt                  // [((0x20 + rindex) < size), (0x20 + windex), (0x20 + rindex)]
+    read_another jumpi  // [windex, rindex]
+    
+  pop                   // [rindex, 0x01]
+  sub                   // [(rindex - 0x01)]
+
+  // output stack: [size]
+}
+
+#define macro PERFORM_READ_SIZES() = takes (0) returns (0) {
+
+  callvalue     // [0x00]
+  sload         // [sload[0x00]]
+  callvalue     // [value, sload[0x00]]
+  mstore        // []
+
+}
+
+#define macro PERFORM_READ_ADDRESS() = takes (0) returns (0) {
+
+  0x01          // [0x01]
+  calldataload  // [data[0x01]]
+
+  [ADDRESS_SMV] // [ADDRESS_SMV, data[0x00]]
+  add           // [(ADDRESS_SMV + data[0x00])]
+  sload         // [sload[(ADDRESS_SMV + data[0x00])]]
+
+  callvalue     // [0x00, sload[(ADDRESS_SMV + data[0x00])]]
+  mstore        // []
+
+}
+
+#define macro PERFORM_READ_BYTES32() = takes (0) returns (0) {
+
+  0x01          // [0x01]
+  calldataload  // [data[0x01]]
+
+  [BYTES32_SMV] // [BYTES32_SMV, data[0x00]]
+  shl           // [(data[0x00] << BYTES32_SMV)]
+  sload         // [sload[(data[0x00] << BYTES32_SMV)]]
+  
+  callvalue     // [0x00, sload[(data[0x00] << BYTES32_SMV)]]
+  mstore        // []
+
+}
+
+#define macro PERFORM_EXECUTE(nrfs) = takes (1) returns (1) {
+  // input stack: [rindex]
+
+  [FMS]                            // [windex, rindex]
+  READ_EXECUTE(<nrfs>)             // [windex, rindex]
+
+  PERFORM_NESTED_READ_FLAG(<nrfs>) // [windex, rindex]
+  BACKREAD_SINGLE_VALUE()          // [address, windex, rindex]
+
+  swap1                 // [windex, address, rindex]
+  [FMS]                 // [FMS, windex, address, rindex]
+  swap1                 // [windex, FMS, address, rindex]
+  sub                   // [size, address, rindex]
+
+  callvalue             // [0x00, size, address, rindex]  
+  swap1                 // [size, 0x00, address, rindex]
+  [FMS]                 // [FMS, size, 0x00, address, rindex]
+  callvalue             // [0x00, FMS, size, 0x00, address, rindex]
+  callvalue             // [0x00, 0x00, FMS, size, 0x00, address, rindex]
+  swap5                 // [address, 0x00, FMS, size, 0x00, 0x00, rindex]
+  gaslimit              // [gasLimit, address, 0x00, FMS, size, 0x00, 0x00, rindex]
+  call                  // [success, rindex]
+
+  // For now, pop seems safer, since it won't revert all transactions if this is a batch
+  // the only thing to consider is that this could difficult the gas calculation
+  pop                   // [rindex]
+
+  // output stack: [rindex]
+}
+
+#define macro PERFORM_MANY_EXECUTES(nrfs) = takes (1) returns (3) {
+  // input stack: [rindex]
+
+  LOAD_1_BYTE()  // [size, rindex]
+  callvalue      // [i, size, rindex]
+  swap2          // [rindex, size, i]
+
+  do_another:
+    PERFORM_EXECUTE(<nrfs>)  // [rindex, size, i]
+    swap2                    // [i, size, rindex]
+    0x01                     // [0x01, i, size, rindex]
+    add                      // [(0x01 + i), size, rindex]
+    swap2                    // [rindex, size, (0x01 + i)]
+
+    dup2                     // [size, rindex, size, (0x01 + i)]
+    dup4                     // [(0x01 + i), size, rindex, size, (0x01 + i)]
+    lt                       // [((0x01 + i) < size), rindex, size, (0x01 + i)]
+    do_another jumpi         // [rindex, size, (0x01 + i)]
+
+  // output stack: [rindex, size, i]
+}
+
+#define macro DECODE_FULL_EXECUTE(nrfs) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
   READ_EXECUTE(<nrfs>)              // [windex, rindex]
@@ -106,7 +273,7 @@
   // output stack: [windex, rindex]
 }
 
-#define macro READ_MANY_FULL_EXECUTES(nrfs) = takes (2) returns (2) {
+#define macro DECODE_MANY_FULL_EXECUTES(nrfs) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
   swap1          // [rindex, windex]
@@ -115,21 +282,118 @@
   callvalue      // [i, size, rindex, windex]
   swap2          // [rindex, size, i, windex]
 
-  do_another:                 // [rindex, size, i, windex]
-    swap1                     // [size, rindex, i, windex]
-    swap2                     // [i, rindex, size, windex]
-    swap3                     // [windex, rindex, size, i]
+  do_another:                   // [rindex, size, i, windex]
+    swap1                       // [size, rindex, i, windex]
+    swap2                       // [i, rindex, size, windex]
+    swap3                       // [windex, rindex, size, i]
 
-    READ_FULL_EXECUTE(<nrfs>) // [windex, rindex, size, i]
+    DECODE_FULL_EXECUTE(<nrfs>) // [windex, rindex, size, i]
 
-    swap3                     // [i, rindex, size, windex]
-    swap2                     // [size, rindex, i, windex]
-    swap1                     // [rindex, size, i, windex]
+    swap3                       // [i, rindex, size, windex]
+    swap2                       // [size, rindex, i, windex]
+    swap1                       // [rindex, size, i, windex]
 
-    swap2                     // [i, size, rindex, windex]
-    0x01                      // [0x01, i, size, rindex, windex]
-    add                       // [(0x01 + i), size, rindex, windex]
-    swap2                     // [rindex, size, (0x01 + i), windex]
+    swap2                       // [i, size, rindex, windex]
+    0x01                        // [0x01, i, size, rindex, windex]
+    add                         // [(0x01 + i), size, rindex, windex]
+    swap2                       // [rindex, size, (0x01 + i), windex]
+
+    dup2                        // [size, rindex, size, (0x01 + i), windex]
+    dup4                        // [(0x01 + i), size, rindex, size, (0x01 + i), windex]
+    lt                          // [((0x01 + i) < size), rindex, size, (0x01 + i), windex]
+    do_another jumpi            // [rindex, size, (0x01 + i), windex]
+
+  swap1              // [size, rindex, (0x01 + i), windex]
+  swap3              // [windex, rindex, (0x01 + i), size]
+  
+  // output stack: [windex, rindex, (0x01 + i), size]
+}
+
+#define macro PERFORM_CALL(nrfs) = takes (1) returns (1) {
+  // input stack: [rindex]
+
+  [FMS]                            // [windex, rindex]
+  PERFORM_NESTED_READ_FLAG(<nrfs>) // [windex, rindex]
+
+  PERFORM_NESTED_READ_FLAG(<nrfs>) // [windex, rindex]
+  BACKREAD_SINGLE_VALUE()          // [address, windex, rindex]
+
+  swap1                 // [windex, address, rindex]
+  [FMS]                 // [FMS, windex, address, rindex]
+  swap1                 // [windex, FMS, address, rindex]
+  sub                   // [size, address, rindex]
+
+  callvalue             // [0x00, size, address, rindex]  
+  swap1                 // [size, 0x00, address, rindex]
+  [FMS]                 // [FMS, size, 0x00, address, rindex]
+  callvalue             // [0x00, FMS, size, 0x00, address, rindex]
+  callvalue             // [0x00, 0x00, FMS, size, 0x00, address, rindex]
+  swap5                 // [address, 0x00, FMS, size, 0x00, 0x00, rindex]
+  gaslimit              // [gasLimit, address, 0x00, FMS, size, 0x00, 0x00, rindex]
+  call                  // [success, rindex]
+
+  // For now, pop seems safer, since it won't revert all transactions if this is a batch
+  // the only thing to consider is that this could difficult the gas calculation
+  pop                   // [rindex]
+
+  // output stack: [rindex]
+}
+
+#define macro PERFORM_MANY_CALLS(nrfs) = takes (1) returns (3) {
+  // input stack: [rindex]
+
+  LOAD_1_BYTE()  // [size, rindex]
+  callvalue      // [i, size, rindex]
+  swap2          // [rindex, size, i]
+
+  do_another:
+    PERFORM_CALL(<nrfs>)     // [rindex, size, i]
+    swap2                    // [i, size, rindex]
+    0x01                     // [0x01, i, size, rindex]
+    add                      // [(0x01 + i), size, rindex]
+    swap2                    // [rindex, size, (0x01 + i)]
+
+    dup2                     // [size, rindex, size, (0x01 + i)]
+    dup4                     // [(0x01 + i), size, rindex, size, (0x01 + i)]
+    lt                       // [((0x01 + i) < size), rindex, size, (0x01 + i)]
+    do_another jumpi         // [rindex, size, (0x01 + i)]
+
+  // output stack: [rindex, size, i]
+}
+
+#define macro DECODE_CALL(nrfs) = takes (2) returns (2) {
+  // input stack: [windex, rindex]
+
+  PERFORM_NESTED_READ_FLAG(<nrfs>)  // [windex, rindex]
+  PERFORM_NESTED_READ_FLAG(<nrfs>)  // [windex, rindex]
+
+  // output stack: [windex, rindex]
+}
+
+#define macro DECODE_MANY_CALLS(nrfs) = takes (2) returns (2) {
+  // input stack: [windex, rindex]
+
+  swap1          // [rindex, windex]
+
+  LOAD_1_BYTE()  // [size, rindex, windex]
+  callvalue      // [i, size, rindex, windex]
+  swap2          // [rindex, size, i, windex]
+
+  do_another:        // [rindex, size, i, windex]
+    swap1            // [size, rindex, i, windex]
+    swap2            // [i, rindex, size, windex]
+    swap3            // [windex, rindex, size, i]
+
+    DECODE_CALL(<nrfs>) // [windex, rindex, size, i]
+
+    swap3            // [i, rindex, size, windex]
+    swap2            // [size, rindex, i, windex]
+    swap1            // [rindex, size, i, windex]
+
+    swap2            // [i, size, rindex, windex]
+    0x01             // [0x01, i, size, rindex, windex]
+    add              // [(0x01 + i), size, rindex, windex]
+    swap2            // [rindex, size, (0x01 + i), windex]
 
     dup2             // [size, rindex, size, (0x01 + i), windex]
     dup4             // [(0x01 + i), size, rindex, size, (0x01 + i), windex]
@@ -140,4 +404,12 @@
   swap3              // [windex, rindex, (0x01 + i), size]
   
   // output stack: [windex, rindex, (0x01 + i), size]
+}
+
+#define macro DECODE_ANY(nrfs) = takes (1) returns (2) {
+  // input stack: [rindex]
+
+  PERFORM_NESTED_READ_FLAG(<nrfs>) // [windex, rindex]
+
+  // output stack: [windex, rindex]
 }

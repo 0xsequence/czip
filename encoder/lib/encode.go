@@ -236,27 +236,27 @@ func (buf *Buffer) WriteWord(word []byte, useStorage bool) (EncodeType, error) {
 	paddedWord := make([]byte, 32)
 	copy(paddedWord[32-len(word):], word)
 
-	buf.WriteBytes(encoded)
-	buf.End(paddedWord, t)
+	buf.commitBytes(encoded)
+	buf.end(paddedWord, t)
 
 	return t, nil
 }
 
 // Encodes N bytes, without any optimizations
 func (buf *Buffer) WriteNBytesRaw(bytes []byte) (EncodeType, error) {
-	buf.WriteInt(FLAG_READ_N_BYTES)
-	buf.End(bytes, Stateless)
+	buf.commitUint(FLAG_READ_N_BYTES)
+	buf.end(bytes, Stateless)
 
 	t, err := buf.WriteWord(uintToBytes(uint64(len(bytes))), false)
 	if err != nil {
 		return Stateless, err
 	}
 
-	buf.WriteBytes(bytes)
+	buf.commitBytes(bytes)
 
-	// End this last write without creating a flag pointer
+	// end this last write without creating a flag pointer
 	// this is a data blob, not a flag
-	buf.End([]byte{}, t)
+	buf.end([]byte{}, t)
 
 	return t, nil
 }
@@ -305,8 +305,8 @@ func (buf *Buffer) WriteSequenceTransactions(txs sequence.Transactions) (EncodeT
 	}
 
 	// The first byte is the number of transactions
-	buf.WriteInt(uint(len(txs)))
-	buf.End([]byte{}, Stateless)
+	buf.commitUint(uint(len(txs)))
+	buf.end([]byte{}, Stateless)
 
 	encodeType := Stateless
 
@@ -358,8 +358,8 @@ func (buf *Buffer) WriteSequenceTransaction(tx *sequence.Transaction) (EncodeTyp
 		flag |= 0x01
 	}
 
-	buf.WriteByte(flag)
-	buf.End([]byte{}, Stateless)
+	buf.commitByte(flag)
+	buf.end([]byte{}, Stateless)
 
 	encodeType := Stateless
 
@@ -396,8 +396,8 @@ func (buf *Buffer) WriteSequenceTransaction(tx *sequence.Transaction) (EncodeTyp
 		var t EncodeType
 
 		if len(tx.Transactions) > 0 {
-			buf.WriteInt(FLAG_READ_EXECUTE)
-			buf.End([]byte{}, Stateless)
+			buf.commitUint(FLAG_READ_EXECUTE)
+			buf.end([]byte{}, Stateless)
 
 			t, err = buf.WriteSequenceExecute(nil, tx)
 		} else {
@@ -491,16 +491,16 @@ func (buf *Buffer) WriteSequenceSignatureBody(noChain bool, body []byte) (Encode
 		tflag = FLAG_S_L_SIG_NO_CHAIN
 	}
 
-	buf.WriteInt(tflag)
+	buf.commitUint(tflag)
 
 	// On long threshold we use 2 bytes for the threshold
 	if longThreshold {
-		buf.WriteBytes(body[:2])
+		buf.commitBytes(body[:2])
 	} else {
-		buf.WriteByte(body[1])
+		buf.commitByte(body[1])
 	}
 
-	buf.End(body, Stateless)
+	buf.end(body, Stateless)
 
 	// Next 4 bytes is the checkpoint
 	if len(body) < 6 {
@@ -559,16 +559,16 @@ func (buf *Buffer) WriteSequenceSignatureTree(tree []byte) (EncodeType, error) {
 
 	if totalParts > 1 {
 		if totalParts > 255 {
-			buf.WriteInt(FLAG_NESTED_N_FLAGS_16)
-			buf.WriteByte(byte(totalParts >> 8))
-			buf.WriteByte(byte(totalParts))
+			buf.commitUint(FLAG_NESTED_N_FLAGS_16)
+			buf.commitByte(byte(totalParts >> 8))
+			buf.commitByte(byte(totalParts))
 		} else {
-			buf.WriteInt(FLAG_NESTED_N_FLAGS_8)
-			buf.WriteByte(byte(totalParts))
+			buf.commitUint(FLAG_NESTED_N_FLAGS_8)
+			buf.commitByte(byte(totalParts))
 		}
 	}
 
-	buf.End([]byte{}, Stateless)
+	buf.end([]byte{}, Stateless)
 
 	// Now we need to encode every nested part, one for each signature part
 	encodeType := Stateless
@@ -653,10 +653,10 @@ func (buf *Buffer) WriteSequenceNestedSignaturePart(weight uint, threshold uint,
 		return Stateless, fmt.Errorf("threshold exceeds 255")
 	}
 
-	buf.WriteInt(FLAG_NESTED)
-	buf.WriteInt(weight)
-	buf.WriteInt(threshold)
-	buf.End([]byte{}, Stateless)
+	buf.commitUint(FLAG_NESTED)
+	buf.commitUint(weight)
+	buf.commitUint(threshold)
+	buf.end([]byte{}, Stateless)
 
 	return buf.WriteSequenceSignatureTree(branch)
 }
@@ -666,8 +666,8 @@ func (buf *Buffer) WriteSequenceBranchSignaturePart(branch []byte) (EncodeType, 
 		return Stateless, fmt.Errorf("branch is empty")
 	}
 
-	buf.WriteInt(FLAG_BRANCH)
-	buf.End([]byte{}, Stateless)
+	buf.commitUint(FLAG_BRANCH)
+	buf.end([]byte{}, Stateless)
 
 	return buf.WriteSequenceSignatureTree(branch)
 }
@@ -683,9 +683,9 @@ func (buf *Buffer) WriteSequenceDynamicSignaturePart(address []byte, weight uint
 
 	unsuffixed := signature[:len(signature)-1]
 
-	buf.WriteInt(FLAG_DYNAMIC_SIGNATURE)
-	buf.WriteInt(weight)
-	buf.End([]byte{}, Stateless)
+	buf.commitUint(FLAG_DYNAMIC_SIGNATURE)
+	buf.commitUint(weight)
+	buf.end([]byte{}, Stateless)
 
 	// The address must be 20 bytes long
 	// write it as a word
@@ -728,15 +728,15 @@ func (buf *Buffer) WriteSequenceChainedSignature(signature []byte) (EncodeType, 
 	// depending on the number of parts
 	totalParts := uint(len(parts))
 	if totalParts > 255 {
-		buf.WriteInt(FLAG_READ_CHAINED_L)
-		buf.WriteByte(byte(totalParts >> 8))
-		buf.WriteByte(byte(totalParts))
+		buf.commitUint(FLAG_READ_CHAINED_L)
+		buf.commitByte(byte(totalParts >> 8))
+		buf.commitByte(byte(totalParts))
 	} else {
-		buf.WriteInt(FLAG_READ_CHAINED)
-		buf.WriteByte(byte(totalParts))
+		buf.commitUint(FLAG_READ_CHAINED)
+		buf.commitByte(byte(totalParts))
 	}
 
-	buf.End([]byte{}, Stateless)
+	buf.end([]byte{}, Stateless)
 
 	// Now we need to encode every nested part, one for each signature part
 	encodeType := Stateless
@@ -758,8 +758,8 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// Empty bytes can be represented with a no-op
 	// cost: 0
 	if len(bytes) == 0 {
-		buf.WriteInt(FLAG_NO_OP)
-		buf.End(bytes, Stateless)
+		buf.commitUint(FLAG_NO_OP)
+		buf.end(bytes, Stateless)
 		return Stateless, nil
 	}
 
@@ -779,11 +779,11 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 		// We can only encode 16 bits for the mirror flag
 		// if it exceeds this value, then we can't mirror it
 		if usedFlag <= 0xffff {
-			buf.WriteInt(FLAG_MIRROR_FLAG)
-			buf.WriteBytes([]byte{byte(usedFlag >> 8), byte(usedFlag)})
-			// End without creating a second pointer
+			buf.commitUint(FLAG_MIRROR_FLAG)
+			buf.commitBytes([]byte{byte(usedFlag >> 8), byte(usedFlag)})
+			// end without creating a second pointer
 			// otherwise we will be creating a pointer to a pointer
-			buf.End([]byte{}, Mirror)
+			buf.end([]byte{}, Mirror)
 			return Mirror, nil
 		}
 	}
@@ -792,19 +792,19 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// cost: 3 bytes
 	copyIndex := buf.FindPastData(bytes)
 	if copyIndex != -1 && copyIndex <= 0xffff {
-		buf.WriteInt(FLAG_COPY_CALLDATA)
-		buf.WriteBytes([]byte{byte(copyIndex >> 8), byte(copyIndex), byte(len(bytes))})
-		// End without creating a second pointer
+		buf.commitUint(FLAG_COPY_CALLDATA)
+		buf.commitBytes([]byte{byte(copyIndex >> 8), byte(copyIndex), byte(len(bytes))})
+		// end without creating a second pointer
 		// data can be copied from the calldata directly
-		buf.End([]byte{}, Stateless)
+		buf.end([]byte{}, Stateless)
 		return Mirror, nil
 	}
 
 	// If the bytes are 33 bytes long, and the first byte is 0x03 it can be represented as a "node"
 	// cost: 0 bytes + word
 	if len(bytes) == 33 && bytes[0] == 0x03 {
-		buf.WriteInt(FLAG_NODE)
-		buf.End(bytes, Stateless)
+		buf.commitUint(FLAG_NODE)
+		buf.end(bytes, Stateless)
 
 		t, err := buf.WriteWord(bytes[1:], saveWord)
 		if err != nil {
@@ -817,8 +817,8 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// If the bytes are 33 bytes long and starts with 0x05 it can be represented as a "subdigest"
 	// cost: 0 bytes + word
 	if len(bytes) == 33 && bytes[0] == 0x05 {
-		buf.WriteInt(FLAG_SUBDIGEST)
-		buf.End(bytes, Stateless)
+		buf.commitUint(FLAG_SUBDIGEST)
+		buf.end(bytes, Stateless)
 
 		t, err := buf.WriteWord(bytes[1:], saveWord)
 		if err != nil {
@@ -833,14 +833,14 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	if len(bytes) == 22 && bytes[0] == 0x01 {
 		// If the firt byte (weight) is between 1 and 4, then there is a special flag
 		if bytes[1] >= 1 && bytes[1] <= 4 {
-			buf.WriteInt(FLAG_ADDRESS_W0 + uint(bytes[1]))
+			buf.commitUint(FLAG_ADDRESS_W0 + uint(bytes[1]))
 		} else {
 			// We need to use FLAG_ADDRES_W0 and 1 extra byte for the weight
-			buf.WriteInt(FLAG_ADDRESS_W0)
-			buf.WriteByte(bytes[1])
+			buf.commitUint(FLAG_ADDRESS_W0)
+			buf.commitByte(bytes[1])
 		}
 
-		buf.End(bytes, Stateless)
+		buf.end(bytes, Stateless)
 
 		t, err := buf.WriteWord(bytes[2:], saveWord)
 		if err != nil {
@@ -855,15 +855,15 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	if len(bytes) == 68 && bytes[0] == 0x00 {
 		// If the first byte (weight) is between 1 and 4, then there is a special flag
 		if bytes[1] >= 1 && bytes[1] <= 4 {
-			buf.WriteInt(FLAG_SIGNATURE_W0 + uint(bytes[1]))
+			buf.commitUint(FLAG_SIGNATURE_W0 + uint(bytes[1]))
 		} else {
 			// We need to use FLAG_SIGNATURE_W0 and 1 extra byte for the weight
-			buf.WriteInt(FLAG_SIGNATURE_W0)
-			buf.WriteByte(bytes[1])
+			buf.commitUint(FLAG_SIGNATURE_W0)
+			buf.commitByte(bytes[1])
 		}
 
-		buf.WriteBytes(bytes[2:])
-		buf.End(bytes, Stateless)
+		buf.commitBytes(bytes[2:])
+		buf.end(bytes, Stateless)
 		return Stateless, nil
 	}
 
@@ -885,9 +885,9 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// If the bytes are a multiple of 32 + 4 bytes (max 6 * 32 + 4) then it
 	// can be encoded as an ABI call with 0 to 6 parameters
 	if len(bytes) <= 6*32+4 && (len(bytes)-4)%32 == 0 {
-		buf.WriteInt(FLAG_ABI_0_PARAM + uint((len(bytes)-4)/32))
-		buf.WriteBytes(buf.Encode4Bytes(bytes[:4]))
-		buf.End(bytes, Stateless)
+		buf.commitUint(FLAG_ABI_0_PARAM + uint((len(bytes)-4)/32))
+		buf.commitBytes(buf.Encode4Bytes(bytes[:4]))
+		buf.end(bytes, Stateless)
 
 		encodeType := Stateless
 
@@ -906,13 +906,13 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// If the bytes are a multiple of 32 + 4 bytes (max 256 * 32 + 4) then it
 	// can be represented using dynamic encoded ABI
 	if len(bytes) <= 256*32+4 && (len(bytes)-4)%32 == 0 {
-		buf.WriteInt(FLAG_READ_DYNAMIC_ABI)
-		buf.WriteBytes(buf.Encode4Bytes(bytes[:4]))
-		buf.WriteInt(uint((len(bytes) - 4) / 32)) // The number of ARGs
+		buf.commitUint(FLAG_READ_DYNAMIC_ABI)
+		buf.commitBytes(buf.Encode4Bytes(bytes[:4]))
+		buf.commitUint(uint((len(bytes) - 4) / 32)) // The number of ARGs
 		// This flag can be used to compress dynamic size arguments too
 		// but in this case, we just leave it as 0s so all arguments are 32 bytes
-		buf.WriteInt(0)
-		buf.End(bytes, Stateless)
+		buf.commitUint(0)
+		buf.end(bytes, Stateless)
 
 		encodeType := Stateless
 

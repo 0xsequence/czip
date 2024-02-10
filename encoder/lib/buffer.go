@@ -24,12 +24,20 @@ type References struct {
 	usedStorageFlags map[string]int
 }
 
-func NewBuffer(indexes *Indexes, useStorage bool) *Buffer {
+func NewBuffer(method uint, indexes *Indexes, useStorage bool) *Buffer {
+	if indexes == nil {
+		indexes = &Indexes{
+			AddressIndexes: make(map[string]uint),
+			Bytes32Indexes: make(map[string]uint),
+			Bytes4Indexes:  make(map[string]uint),
+		}
+	}
+
 	return &Buffer{
 		// Start with an empty byte, this
 		// will be used as the method when calling the compressor
 		// contract.
-		Commited: make([]byte, 1),
+		Commited: []byte{byte(method)},
 		Pending:  make([]byte, 0),
 
 		Refs: &References{
@@ -68,16 +76,16 @@ func (cb *Buffer) Len() int {
 	return len(cb.Commited)
 }
 
-func (cb *Buffer) WriteByte(b byte) {
+func (cb *Buffer) commitByte(b byte) {
 	cb.Pending = append(cb.Pending, b)
 }
 
-func (cb *Buffer) WriteBytes(b []byte) {
+func (cb *Buffer) commitBytes(b []byte) {
 	cb.Pending = append(cb.Pending, b...)
 }
 
-func (cb *Buffer) WriteInt(i uint) {
-	cb.WriteByte(byte(i))
+func (cb *Buffer) commitUint(i uint) {
+	cb.commitByte(byte(i))
 }
 
 func (cb *Buffer) FindPastData(data []byte) int {
@@ -90,7 +98,7 @@ func (cb *Buffer) FindPastData(data []byte) int {
 	return -1
 }
 
-func (cb *Buffer) End(uncompressed []byte, t EncodeType) {
+func (cb *Buffer) end(uncompressed []byte, t EncodeType) {
 	// We need 2 bytes to point to a flag, so any uncompressed value
 	// that is 2 bytes or less is not worth saving.
 	if len(uncompressed) > 2 {
