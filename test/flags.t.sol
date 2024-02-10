@@ -326,4 +326,54 @@ contract FlagsTest is Test {
     bytes memory decoded = decode(encoded);
     assertEq(expect, decoded);
   }
+
+  function test_sequenceBranchSignature(uint8 _innerWeight, address _innerPart) external {
+    bytes memory data = abi.encodePacked(uint8(0x01), _innerWeight, _innerPart);
+    bytes memory expected = abi.encodePacked(uint8(0x04), uint24(22), uint8(0x01), _innerWeight, _innerPart);
+    bytes memory encoded = vm.encodeExtra("SEQUENCE_BRANCH_SIGNATURE_PART", data)
+      .useStorage(false)
+      .run();
+    bytes memory decoded = decode(encoded);
+    assertEq(expected, decoded);
+  }
+
+  function test_sequenceNestedSignature(uint8 _weight, uint8 _threshold, uint8 _innerWeight, address _innerPart) external {
+    bytes memory data = abi.encodePacked(_weight, _threshold, uint8(0x01), _innerWeight, _innerPart);
+    bytes memory expected = abi.encodePacked(
+      uint8(0x06),
+      _weight,
+      uint16(_threshold),
+      uint24(22),
+      uint8(0x01),
+      _innerWeight,
+      _innerPart
+    );
+
+    bytes memory encoded = vm.encodeExtra("SEQUENCE_NESTED_SIGNATURE_PART", data)
+      .useStorage(false)
+      .run();
+  
+    bytes memory decoded = decode(encoded);
+    assertEq(expected, decoded);
+  }
+
+  function test_sequenceChainedSignature(address[] calldata _parts) external {
+    vm.assume(_parts.length > 0);
+
+    bytes memory data = hex"";
+    bytes memory expected = hex"03";
+
+    for (uint i = 0; i < _parts.length; i++) {
+      bytes memory subsig = abi.encodePacked(uint16(0x00), uint32(0x223344), uint8(0x01), uint8(0x02), _parts[i]);
+      data = abi.encodePacked(data, uint24(subsig.length), subsig);
+      expected = abi.encodePacked(expected, uint24(subsig.length + 1), uint8(0x01), subsig);
+    }
+
+    bytes memory encoded = vm.encodeExtra("SEQUENCE_CHAINED_SIGNATURE", data)
+      .useStorage(false) // This treats each signature as a blob of bytes
+      .run();
+  
+    bytes memory decoded = decode(encoded);
+    assertEq(expected, decoded);
+  }
 }
