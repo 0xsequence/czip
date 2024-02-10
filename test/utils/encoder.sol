@@ -16,6 +16,15 @@ library Encoder {
     return CommandBuffer(_vm, inputs);
   }
 
+  function encodeExtra(Vm _vm, string memory _extra, bytes memory _data) internal pure returns (CommandBuffer memory) {
+    string[] memory inputs = new string[](4);
+    inputs[0] = "./run_encoder.sh";
+    inputs[1] = "extras";
+    inputs[2] = _extra;
+    inputs[3] = _vm.toString(_data);
+    return CommandBuffer(_vm, inputs);
+  }
+
   function useStorage(CommandBuffer memory buffer, bool use) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](buffer.commands.length + 2);
     for (uint i = 0; i < buffer.commands.length; i++) {
@@ -28,21 +37,47 @@ library Encoder {
 
   function allowOps(CommandBuffer memory buffer, string memory ops) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](buffer.commands.length + 2);
+
+    bool hasCommand = false;
+
     for (uint i = 0; i < buffer.commands.length; i++) {
       inputs[i] = buffer.commands[i];
+      if (keccak256(bytes(buffer.commands[i])) == keccak256(bytes("--allow-opcodes"))) {
+        // Add ",ops" to the command after this
+        inputs[i + 1] = string(abi.encodePacked(buffer.commands[i + 1], ",", ops));
+        hasCommand = true;
+        i++;
+      }
     }
-    inputs[buffer.commands.length] = "--allow-opcodes";
-    inputs[buffer.commands.length + 1] = ops;
+
+    if (!hasCommand) {
+      inputs[buffer.commands.length] = "--allow-opcodes";
+      inputs[buffer.commands.length + 1] = ops;
+    }
+
     return CommandBuffer(buffer.vm, inputs);
   }
 
   function forbidOps(CommandBuffer memory buffer, string memory ops) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](buffer.commands.length + 2);
+
+    bool hasCommand = false;
+
     for (uint i = 0; i < buffer.commands.length; i++) {
       inputs[i] = buffer.commands[i];
+      if (keccak256(bytes(buffer.commands[i])) == keccak256(bytes("--disallow-opcodes"))) {
+        // Add ",ops" to the command after this
+        inputs[i + 1] = string(abi.encodePacked(buffer.commands[i + 1], ",", ops));
+        hasCommand = true;
+        i++;
+      }
     }
-    inputs[buffer.commands.length] = "--disallow-opcodes";
-    inputs[buffer.commands.length + 1] = ops;
+
+    if (!hasCommand) {
+      inputs[buffer.commands.length] = "--disallow-opcodes";
+      inputs[buffer.commands.length + 1] = ops;
+    }
+
     return CommandBuffer(buffer.vm, inputs);
   }
 

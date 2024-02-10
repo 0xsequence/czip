@@ -16,7 +16,7 @@ func main() {
 	}
 
 	if len(args.Positional) < 1 {
-		fmt.Println("Usage: encode_sequence_tx / encode_call / encode_calls / encode_any ")
+		fmt.Println("Usage: encode_sequence_tx / encode_call / encode_calls / encode_any / extras")
 		os.Exit(1)
 	}
 
@@ -31,8 +31,10 @@ func main() {
 		res, err = encodeCalls(args)
 	case "encode_any":
 		res, err = encodeAny(args)
+	case "extras":
+		res, err = cmd.EncodeExtras(args)
 	default:
-		fmt.Println("Usage: encode_sequence_tx / encode_call / encode_calls / encode_any ")
+		fmt.Println("Usage: encode_sequence_tx / encode_call / encode_calls / encode_any / extras ")
 		os.Exit(1)
 	}
 
