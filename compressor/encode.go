@@ -978,3 +978,48 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// for now we leave it as bytes_n for simplicity
 	return buf.WriteNBytesRaw(bytes)
 }
+
+func (buf *Buffer) WriteCall(to []byte, data []byte) (EncodeType, error) {
+	t, err := buf.WriteBytesOptimized(data, true)
+	if err != nil {
+		return Stateless, err
+	}
+
+	tt, err := buf.WriteWord(to, true)
+	if err != nil {
+		return Stateless, err
+	}
+
+	return maxPriority(t, tt), nil
+}
+
+func (buf *Buffer) WriteCalls(tos [][]byte, datas [][]byte) (EncodeType, error) {
+	if len(tos) == 0 {
+		return Stateless, fmt.Errorf("calls are empty")
+	}
+
+	if len(tos) > 255 {
+		return Stateless, fmt.Errorf("calls exceeds 255")
+	}
+
+	if len(tos) != len(datas) {
+		return Stateless, fmt.Errorf("calls and datas have different lengths")
+	}
+
+	// The first byte is the number of calls
+	buf.commitUint(uint(len(tos)))
+	buf.end([]byte{}, Stateless)
+
+	encodeType := Stateless
+
+	for i, to := range tos {
+		t, err := buf.WriteCall(to, datas[i])
+		if err != nil {
+			return Stateless, err
+		}
+
+		encodeType = maxPriority(encodeType, t)
+	}
+
+	return encodeType, nil
+}

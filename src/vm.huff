@@ -131,7 +131,7 @@
   FLAG_ABI_5_PARAMS          // 0x32
   FLAG_ABI_6_PARAMS          // 0x33
   FLAG_NESTED_N_FLAGS_S      // 0x34
-  FLAG_NESTED_N_FLAGS_L     // 0x35
+  FLAG_NESTED_N_FLAGS_L      // 0x35
   // start: Signature specific methods
   FLAG_SIGNATURE_W0          // 0x36
   FLAG_SIGNATURE_W1          // 0x37

@@ -65,16 +65,12 @@ func encodeAny(args *ParsedArgs) (string, error) {
 }
 
 func encodeCalls(args *ParsedArgs) (string, error) {
-	return "", fmt.Errorf("Not implemented")
-}
+	if len(args.Positional) < 2 {
+		return "", fmt.Errorf("usage: encode_calls <action> <hex> <addr> <hex> <addr> ... <hex> <addr>")
+	}
 
-func encodeCall(args *ParsedArgs) (string, error) {
-	return "", fmt.Errorf("Not implemented")
-}
-
-func encodeSequenceTx(args *ParsedArgs) (string, error) {
-	if len(args.Positional) < 4 {
-		return "", fmt.Errorf("usage: encode_sequence_tx <decode/call> <data> <addr>")
+	if len(args.Positional)%2 != 0 {
+		return "", fmt.Errorf("invalid number of arguments")
 	}
 
 	action := args.Positional[1]
@@ -82,13 +78,62 @@ func encodeSequenceTx(args *ParsedArgs) (string, error) {
 		return "", fmt.Errorf("invalid action: %s", action)
 	}
 
-	txs, nonce, sig, err := sequence.DecodeExecdata(common.FromHex(args.Positional[2]))
+	var method uint
+	if action == "decode" {
+		method = compressor.METHOD_DECODE_N_CALLS
+	} else {
+		method = compressor.METHOD_EXECUTE_N_CALLS
+	}
+
+	datas := make([][]byte, (len(args.Positional)-2)/2)
+	addrs := make([][]byte, (len(args.Positional)-2)/2)
+
+	for i := 2; i < len(args.Positional); i += 2 {
+		datas[i/2-1] = common.FromHex(args.Positional[i])
+		addrs[i/2-1] = common.HexToAddress(args.Positional[i+1]).Bytes()
+	}
+
+	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
+	_, err := buf.WriteCalls(addrs, datas)
 	if err != nil {
 		return "", err
 	}
 
-	// Wallet address is in position 2
-	wallet := common.HexToAddress(args.Positional[3])
+	return fmt.Sprintf("0x%x", buf.Commited), nil
+}
+
+func encodeCall(args *ParsedArgs) (string, error) {
+	action, data, addr, err := ParseCommonArgs(args)
+	if err != nil {
+		return "", err
+	}
+
+	var method uint
+	if action == "decode" {
+		method = compressor.METHOD_DECODE_CALL
+	} else {
+		method = compressor.METHOD_EXECUTE_CALL
+	}
+
+	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
+	_, err = buf.WriteCall(addr, data)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("0x%x", buf.Commited), nil
+}
+
+func encodeSequenceTx(args *ParsedArgs) (string, error) {
+	action, data, addr, err := ParseCommonArgs(args)
+	if err != nil {
+		return "", err
+	}
+
+	txs, nonce, sig, err := sequence.DecodeExecdata(data)
+	if err != nil {
+		return "", err
+	}
 
 	var method uint
 	if action == "decode" {
@@ -98,7 +143,7 @@ func encodeSequenceTx(args *ParsedArgs) (string, error) {
 	}
 
 	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
-	_, err = buf.WriteSequenceExecute(wallet.Bytes(), &sequence.Transaction{
+	_, err = buf.WriteSequenceExecute(addr, &sequence.Transaction{
 		Nonce:        nonce,
 		Transactions: txs,
 		Signature:    sig,
@@ -109,4 +154,20 @@ func encodeSequenceTx(args *ParsedArgs) (string, error) {
 	}
 
 	return fmt.Sprintf("0x%x", buf.Commited), nil
+}
+
+func ParseCommonArgs(args *ParsedArgs) (string, []byte, []byte, error) {
+	if len(args.Positional) < 4 {
+		return "", nil, nil, fmt.Errorf("usage: <decode/call> <data> <addr>")
+	}
+
+	action := args.Positional[1]
+	if action != "decode" && action != "call" {
+		return "", nil, nil, fmt.Errorf("invalid action: %s", action)
+	}
+
+	data := common.FromHex(args.Positional[2])
+	addr := common.HexToAddress(args.Positional[3])
+
+	return action, data, addr.Bytes(), nil
 }

@@ -18,7 +18,7 @@ contract FlagsTest is Test {
   }
 
   function decode(bytes memory _data) internal returns (bytes memory) {
-    (bool res, bytes memory decoded) = compressor.call{ gas: 30000000 }(_data);
+    (bool res, bytes memory decoded) = compressor.call{ gas: 300000000 }(_data);
     require(res, "Failed to decode");
     return decoded;
   }
@@ -408,6 +408,62 @@ contract FlagsTest is Test {
       .run();
 
     vm.expectCall(_wallet, 0, data);
+
+    bytes memory decoded = decode(encoded);
+    assertEq(decoded.length, 0);
+  }
+
+  function test_call_decode(address _to, bytes memory _data) external {
+    bytes memory encoded = vm.encodeCall("decode", _to, _data)
+      .useStorage(false)
+      .run();
+
+    bytes memory decoded = decode(encoded);
+    assertEq(abi.encodePacked(_data, abi.encode(_to)), decoded);
+  }
+
+  function test_call_call(address _to, bytes memory _data) external {
+    bytes memory encoded = vm.encodeCall("call", _to, _data)
+      .useStorage(false)
+      .run();
+
+    vm.expectCall(_to, 0, _data);
+
+    bytes memory res = decode(encoded);
+    assertEq(res.length, 0);
+  }
+
+  function test_calls_decode(Encoder.Call[] calldata _calls) external {
+    vm.assume(_calls.length > 0 && _calls.length <= 100);
+
+    bytes memory expected = hex"";
+    for (uint i = 0; i < _calls.length; i++) {
+      expected = abi.encodePacked(expected, _calls[i].data, abi.encode(_calls[i].to));
+    }
+
+    bytes memory encoded = vm.encodeCalls("decode", _calls)
+      .useStorage(false)
+      .run();
+
+    bytes memory decoded = decode(encoded);
+    assertEq(expected, decoded);
+  }
+
+  function test_calls_call(Encoder.Call[] memory _calls) external {
+    vm.assume(_calls.length > 0 && _calls.length <= 64);
+
+    // Re-hash all `to` so they point to different addresses
+    for (uint i = 0; i < _calls.length; i++) {
+      _calls[i].to = address(uint160(uint256(keccak256(abi.encodePacked(i, _calls[i].to)))));
+    }
+
+    for (uint i = 0; i < _calls.length; i++) {
+      vm.expectCall(_calls[i].to, 0, _calls[i].data);
+    }
+
+    bytes memory encoded = vm.encodeCalls("call", _calls)
+      .useStorage(false)
+      .run();
 
     bytes memory decoded = decode(encoded);
     assertEq(decoded.length, 0);
