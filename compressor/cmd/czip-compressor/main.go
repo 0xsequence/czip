@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/0xsequence/compressor/encoder/cmd"
-	encoder "github.com/0xsequence/compressor/encoder/lib"
+	"github.com/0xsequence/czip/compressor"
 	"github.com/0xsequence/ethkit/go-ethereum/common"
 )
 
 func main() {
-	args, err := cmd.ParseArgs()
+	args, err := ParseArgs()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -32,7 +31,7 @@ func main() {
 	case "encode_any":
 		res, err = encodeAny(args)
 	case "extras":
-		res, err = cmd.EncodeExtras(args)
+		res, err = encodeExtras(args)
 	default:
 		fmt.Println("Usage: encode_sequence_tx / encode_call / encode_calls / encode_any / extras ")
 		os.Exit(1)
@@ -48,8 +47,8 @@ func main() {
 	os.Exit(0)
 }
 
-func encodeAny(args *cmd.ParsedArgs) (string, error) {
-	buf := encoder.NewBuffer(encoder.METHOD_DECODE_ANY, nil, cmd.ParseAllowOpcodes(args), cmd.ParseUseStorage(args))
+func encodeAny(args *ParsedArgs) (string, error) {
+	buf := compressor.NewBuffer(compressor.METHOD_DECODE_ANY, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
 
 	if len(args.Positional) < 2 {
 		return "", fmt.Errorf("usage: encode_any <hex>")
@@ -64,14 +63,14 @@ func encodeAny(args *cmd.ParsedArgs) (string, error) {
 	return fmt.Sprintf("0x%x", buf.Commited), nil
 }
 
-func encodeCalls(args *cmd.ParsedArgs) (string, error) {
+func encodeCalls(args *ParsedArgs) (string, error) {
 	return "", fmt.Errorf("Not implemented")
 }
 
-func encodeCall(args *cmd.ParsedArgs) (string, error) {
+func encodeCall(args *ParsedArgs) (string, error) {
 	return "", fmt.Errorf("Not implemented")
 }
 
-func encodeSequenceTx(args *cmd.ParsedArgs) (string, error) {
+func encodeSequenceTx(args *ParsedArgs) (string, error) {
 	return "", fmt.Errorf("Not implemented")
 }

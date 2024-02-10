@@ -10,7 +10,7 @@ library Encoder {
 
   function encodeAny(Vm _vm, bytes memory _data) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](3);
-    inputs[0] = "./run_encoder.sh";
+    inputs[0] = "./compressor/bin/czip-compressor";
     inputs[1] = "encode_any";
     inputs[2] = _vm.toString(_data);
     return CommandBuffer(_vm, inputs);
@@ -18,7 +18,7 @@ library Encoder {
 
   function encodeExtra(Vm _vm, string memory _extra, bytes memory _data) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](4);
-    inputs[0] = "./run_encoder.sh";
+    inputs[0] = "./compressor/bin/czip-compressor";
     inputs[1] = "extras";
     inputs[2] = _extra;
     inputs[3] = _vm.toString(_data);
