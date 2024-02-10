@@ -25,6 +25,16 @@ library Encoder {
     return CommandBuffer(_vm, inputs);
   }
 
+  function encodeSequenceTx(Vm _vm, string memory _action, address _wallet, bytes memory _data) internal pure returns (CommandBuffer memory) {
+    string[] memory inputs = new string[](5);
+    inputs[0] = "./compressor/bin/czip-compressor";
+    inputs[1] = "encode_sequence_tx";
+    inputs[2] = _action;
+    inputs[3] = _vm.toString(_data);
+    inputs[4] = _vm.toString(_wallet);
+    return CommandBuffer(_vm, inputs);
+  }
+
   function useStorage(CommandBuffer memory buffer, bool use) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](buffer.commands.length + 2);
     for (uint i = 0; i < buffer.commands.length; i++) {

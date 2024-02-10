@@ -6,6 +6,7 @@ import (
 
 	"github.com/0xsequence/czip/compressor"
 	"github.com/0xsequence/ethkit/go-ethereum/common"
+	"github.com/0xsequence/go-sequence"
 )
 
 func main() {
@@ -72,5 +73,40 @@ func encodeCall(args *ParsedArgs) (string, error) {
 }
 
 func encodeSequenceTx(args *ParsedArgs) (string, error) {
-	return "", fmt.Errorf("Not implemented")
+	if len(args.Positional) < 4 {
+		return "", fmt.Errorf("usage: encode_sequence_tx <decode/call> <data> <addr>")
+	}
+
+	action := args.Positional[1]
+	if action != "decode" && action != "call" {
+		return "", fmt.Errorf("invalid action: %s", action)
+	}
+
+	txs, nonce, sig, err := sequence.DecodeExecdata(common.FromHex(args.Positional[2]))
+	if err != nil {
+		return "", err
+	}
+
+	// Wallet address is in position 2
+	wallet := common.HexToAddress(args.Positional[3])
+
+	var method uint
+	if action == "decode" {
+		method = compressor.METHOD_DECODE_SEQUENCE_TX
+	} else {
+		method = compressor.METHOD_EXECUTE_SEQUENCE_TX
+	}
+
+	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
+	_, err = buf.WriteSequenceExecute(wallet.Bytes(), &sequence.Transaction{
+		Nonce:        nonce,
+		Transactions: txs,
+		Signature:    sig,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("0x%x", buf.Commited), nil
 }

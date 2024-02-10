@@ -18,7 +18,7 @@ contract FlagsTest is Test {
   }
 
   function decode(bytes memory _data) internal returns (bytes memory) {
-    (bool res, bytes memory decoded) = compressor.call(_data);
+    (bool res, bytes memory decoded) = compressor.call{ gas: 30000000 }(_data);
     require(res, "Failed to decode");
     return decoded;
   }
@@ -375,5 +375,41 @@ contract FlagsTest is Test {
   
     bytes memory decoded = decode(encoded);
     assertEq(expected, decoded);
+  }
+
+  struct SequenceTransaction {
+    bool delegateCall;
+    bool revertOnError;
+    uint256 gasLimit;
+    address target;
+    uint256 value; 
+    bytes data;
+  }
+
+  function test_sequenceExecute_decode(address _wallet, SequenceTransaction[] memory _txs, uint256 _nonce, bytes memory _signature) external {
+    vm.assume(_txs.length > 0 && _txs.length <= 100);
+
+    bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
+    bytes memory encoded = vm.encodeSequenceTx("decode", _wallet, data)
+      .useStorage(false)
+      .run();
+    
+    bytes memory decoded = decode(encoded);
+    assertEq(abi.encodePacked(data, abi.encode(_wallet)), decoded);
+  }
+
+  function test_sequenceExecute_call(address _wallet, SequenceTransaction[] memory _txs, uint256 _nonce, bytes memory _signature) external {
+    vm.assume(_txs.length > 0 && _txs.length <= 100);
+    vm.assume(_wallet != address(this) && _wallet != compressor);
+
+    bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
+    bytes memory encoded = vm.encodeSequenceTx("call", _wallet, data)
+      .useStorage(false)
+      .run();
+
+    vm.expectCall(_wallet, 0, data);
+
+    bytes memory decoded = decode(encoded);
+    assertEq(decoded.length, 0);
   }
 }
