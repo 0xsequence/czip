@@ -19,8 +19,10 @@ check-huffc:
 forge:
 	forge install
 
-build-compressor:
+build: build-czip-compressor
+
+build-czip-compressor:
 	@cd compressor; make build
 
-test: build-compressor
+test: build-czip-compressor
 	@forge test "$@"
