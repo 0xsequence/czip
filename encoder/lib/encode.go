@@ -17,31 +17,31 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	trimmed := bytes.TrimLeft(word, "\x00")
 
 	// If empty then it can be encoded as literal zero
-	if len(trimmed) == 0 {
+	if buf.Allows(LITERAL_ZERO) && len(trimmed) == 0 {
 		return []byte{byte(LITERAL_ZERO)}, Stateless, nil
 	}
 
 	// Literals are the cheapest encoding
-	if len(trimmed) <= 1 && trimmed[0] <= byte(MAX_LITERAL) {
+	if buf.Allows(LITERAL_ZERO) && len(trimmed) <= 1 && trimmed[0] <= byte(MAX_LITERAL) {
 		return []byte{trimmed[0] + byte(LITERAL_ZERO)}, Stateless, nil
 	}
 
 	// If it only has 1 byte, then we encode it as a word
 	// all other methods use 2 bytes anyway
-	if len(trimmed) == 1 {
-		return EncodeWordBytes32(trimmed)
+	if buf.Allows(FLAG_READ_BYTES32_1_BYTES) && len(trimmed) == 1 {
+		return buf.EncodeWordBytes32(trimmed)
 	}
 
 	// If the word is a power of 2 or 10, we can encode it using 1 byte
 	pow2 := isPow2(trimmed)
-	if pow2 != -1 {
+	if buf.Allows(FLAG_READ_POWER_OF_2) && pow2 != -1 {
 		return []byte{byte(FLAG_READ_POWER_OF_2), byte(pow2)}, Stateless, nil
 	}
 
 	// Notice that marking the first bit of N as 1 denotes that we are going to do
 	// 10 ** N and not 10 ** N * X, that's why we do `| 0x80`
 	pow10 := isPow10(trimmed)
-	if pow10 != -1 && pow10 <= 77 {
+	if buf.Allows(FLAG_READ_POWER_OF_10_MISC) && pow10 != -1 && pow10 != 0 && pow10 <= 77 {
 		return []byte{byte(FLAG_READ_POWER_OF_10_MISC), byte(pow10 | 0x80)}, Stateless, nil
 	}
 
@@ -49,19 +49,19 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// so it goes next. We do it before word encoding since word encoding won't
 	// have the first 2 bytes as 00, in reality this only applies to 0xffff
 	pow2minus1 := isPow2minus1(trimmed)
-	if pow2minus1 != -1 {
+	if buf.Allows(FLAG_READ_POWER_OF_2) && pow2minus1 != -1 {
 		// The opcode adds an extra 1 to the value, so we need to subtract 1
 		return []byte{byte(FLAG_READ_POWER_OF_2), 0x00, byte(pow2minus1 - 1)}, Stateless, nil
 	}
 
 	// Now we can store words of 2 bytes, we have exhausted all the 1 byte options
-	if len(trimmed) <= 2 {
-		return EncodeWordBytes32(trimmed)
+	if buf.Allows(FLAG_READ_BYTES32_1_BYTES) && len(trimmed) <= 2 {
+		return buf.EncodeWordBytes32(trimmed)
 	}
 
 	// We can also use (10 ** N) * X, this uses 2 bytes
 	pow10fn, pow10fm := isPow10Mantissa(trimmed, 127, 255)
-	if pow10fn != -1 && pow10fm != -1 {
+	if buf.Allows(FLAG_READ_POWER_OF_10_MISC) && pow10fn != -1 && pow10fn != 0 && pow10fm != -1 {
 		return []byte{byte(FLAG_READ_POWER_OF_10_MISC), byte(pow10fn), byte(pow10fm)}, Stateless, nil
 	}
 
@@ -72,7 +72,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	padded32str := string(padded32)
 
 	usedFlag := buf.Refs.usedFlags[padded32str]
-	if usedFlag != 0 {
+	if buf.Allows(FLAG_MIRROR_FLAG) && usedFlag != 0 {
 		usedFlag -= 1
 
 		// We can only encode 16 bits for the mirror flag
@@ -87,7 +87,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// re-read the storage flag, that would mean writting to the storage twice
 	// apart from that, they work like normal mirror flags
 	usedStorageFlag := buf.Refs.usedStorageFlags[padded32str]
-	if usedStorageFlag != 0 {
+	if buf.Allows(FLAG_READ_STORE_FLAG) && usedStorageFlag != 0 {
 		usedStorageFlag -= 1
 
 		// We can only encode 16 bits for the mirror flag
@@ -99,13 +99,13 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	// Now any 3 byte word can be encoded as-is, all the other
 	// methods use more than 3 bytes
-	if len(trimmed) <= 3 {
-		return EncodeWordBytes32(trimmed)
+	if buf.Allows(FLAG_READ_BYTES32_1_BYTES) && len(trimmed) <= 3 {
+		return buf.EncodeWordBytes32(trimmed)
 	}
 
 	// With 3 bytes we can encode 10 ** N * X (with a mantissa of 18 bits and an exp of 6 bits)
 	pow10fn, pow10fm = isPow10Mantissa(trimmed, 63, 262143)
-	if pow10fn != -1 && pow10fm != -1 {
+	if buf.Allows(FLAG_READ_POW_10_MANTISSA) && pow10fn != -1 && pow10fn != 0 && pow10fm != -1 {
 		// The first byte is 6 bits of exp and 2 bits of mantissa
 		b1 := byte(uint64(pow10fn)<<2) | byte(uint64(pow10fm)>>16)
 		// The next 16 bits are the last 16 bits of the mantissa
@@ -118,7 +118,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// With 3 bytes we can also copy any other word from the calldata
 	// this can be anything but notice: we must copy the value already padded
 	copyIndex := buf.FindPastData(padded32)
-	if copyIndex != -1 && copyIndex <= 0xffff {
+	if buf.Allows(FLAG_COPY_CALLDATA) && copyIndex != -1 && copyIndex <= 0xffff {
 		return []byte{byte(FLAG_COPY_CALLDATA), byte(copyIndex >> 8), byte(copyIndex), byte(0x20)}, Stateless, nil
 	}
 
@@ -192,14 +192,14 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 			// Any value smaller than 20 bytes can be saved as an address
 			// ALL saved values must be padded to either 20 bytes or 32 bytes
 			// For both cases skip values that are too short already
-			if len(trimmed) <= 20 && len(trimmed) >= 15 {
+			if buf.Allows(FLAG_SAVE_ADDRESS) && len(trimmed) <= 20 && len(trimmed) >= 15 {
 				padded20 := make([]byte, 20)
 				copy(padded20[20-len(trimmed):], trimmed)
 				encoded := []byte{byte(FLAG_SAVE_ADDRESS)}
 				encoded = append(encoded, padded20...)
 				return encoded, WriteStorage, nil
 
-			} else if len(trimmed) >= 27 {
+			} else if buf.Allows(FLAG_SAVE_BYTES32) && len(trimmed) >= 27 {
 				encoded := []byte{byte(FLAG_SAVE_BYTES32)}
 				encoded = append(encoded, padded32...)
 				return encoded, WriteStorage, nil
@@ -208,17 +208,21 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	}
 
 	// We are out of options now, we need to encode the word as-is
-	return EncodeWordBytes32(trimmed)
+	return buf.EncodeWordBytes32(trimmed)
 }
 
 // Encodes a 32 word, without any optimizations
-func EncodeWordBytes32(word []byte) ([]byte, EncodeType, error) {
+func (buf *Buffer) EncodeWordBytes32(word []byte) ([]byte, EncodeType, error) {
 	if len(word) > 32 {
 		return nil, Stateless, fmt.Errorf("word exceeds 32 bytes")
 	}
 
 	if len(word) == 0 {
 		return nil, Stateless, fmt.Errorf("word is empty")
+	}
+
+	if !buf.Allows(FLAG_READ_BYTES32_1_BYTES) {
+		return nil, Stateless, fmt.Errorf("bytes32 encoding is not allowed")
 	}
 
 	encodedWord := []byte{byte(FLAG_READ_BYTES32_1_BYTES + uint(len(word)) - 1)}
@@ -244,6 +248,10 @@ func (buf *Buffer) WriteWord(word []byte, useStorage bool) (EncodeType, error) {
 
 // Encodes N bytes, without any optimizations
 func (buf *Buffer) WriteNBytesRaw(bytes []byte) (EncodeType, error) {
+	if !buf.Allows(FLAG_READ_N_BYTES) {
+		return Stateless, fmt.Errorf("n bytes encoding is not allowed")
+	}
+
 	buf.commitUint(FLAG_READ_N_BYTES)
 	buf.end(bytes, Stateless)
 
@@ -757,7 +765,7 @@ func (buf *Buffer) WriteSequenceChainedSignature(signature []byte) (EncodeType, 
 func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType, error) {
 	// Empty bytes can be represented with a no-op
 	// cost: 0
-	if len(bytes) == 0 {
+	if buf.Allows(FLAG_NO_OP) && len(bytes) == 0 {
 		buf.commitUint(FLAG_NO_OP)
 		buf.end(bytes, Stateless)
 		return Stateless, nil
@@ -773,7 +781,7 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// cost: 2 bytes
 	bytesStr := string(bytes)
 	usedFlag := buf.Refs.usedFlags[bytesStr]
-	if usedFlag != 0 {
+	if buf.Allows(FLAG_MIRROR_FLAG) && usedFlag != 0 {
 		usedFlag -= 1
 
 		// We can only encode 16 bits for the mirror flag
@@ -791,7 +799,7 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// Another optimization is to copy the bytes from the calldata
 	// cost: 3 bytes
 	copyIndex := buf.FindPastData(bytes)
-	if copyIndex != -1 && copyIndex <= 0xffff {
+	if buf.Allows(FLAG_COPY_CALLDATA) && copyIndex != -1 && copyIndex <= 0xffff {
 		buf.commitUint(FLAG_COPY_CALLDATA)
 		buf.commitBytes([]byte{byte(copyIndex >> 8), byte(copyIndex), byte(len(bytes))})
 		// end without creating a second pointer
@@ -802,7 +810,7 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If the bytes are 33 bytes long, and the first byte is 0x03 it can be represented as a "node"
 	// cost: 0 bytes + word
-	if len(bytes) == 33 && bytes[0] == 0x03 {
+	if buf.Allows(FLAG_NODE) && len(bytes) == 33 && bytes[0] == 0x03 {
 		buf.commitUint(FLAG_NODE)
 		buf.end(bytes, Stateless)
 
@@ -816,7 +824,7 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If the bytes are 33 bytes long and starts with 0x05 it can be represented as a "subdigest"
 	// cost: 0 bytes + word
-	if len(bytes) == 33 && bytes[0] == 0x05 {
+	if buf.Allows(FLAG_SUBDIGEST) && len(bytes) == 33 && bytes[0] == 0x05 {
 		buf.commitUint(FLAG_SUBDIGEST)
 		buf.end(bytes, Stateless)
 
@@ -830,7 +838,7 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If bytes has 22 bytes and starts with 0x01, then it is probably an address on a signature
 	// cost: 1 / 0 bytes + address word
-	if len(bytes) == 22 && bytes[0] == 0x01 {
+	if buf.Allows(FLAG_ADDRESS_W0) && len(bytes) == 22 && bytes[0] == 0x01 {
 		// If the firt byte (weight) is between 1 and 4, then there is a special flag
 		if bytes[1] >= 1 && bytes[1] <= 4 {
 			buf.commitUint(FLAG_ADDRESS_W0 + uint(bytes[1]))
@@ -852,7 +860,7 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If the bytes are 68 bytes long and starts with 0x00, the it is probably a signature for a Sequence wallet
 	// cost: 66/67 bytes
-	if len(bytes) == 68 && bytes[0] == 0x00 {
+	if buf.Allows(FLAG_SIGNATURE_W0) && len(bytes) == 68 && bytes[0] == 0x00 {
 		// If the first byte (weight) is between 1 and 4, then there is a special flag
 		if bytes[1] >= 1 && bytes[1] <= 4 {
 			buf.commitUint(FLAG_SIGNATURE_W0 + uint(bytes[1]))
@@ -884,7 +892,7 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If the bytes are a multiple of 32 + 4 bytes (max 6 * 32 + 4) then it
 	// can be encoded as an ABI call with 0 to 6 parameters
-	if len(bytes) <= 6*32+4 && (len(bytes)-4)%32 == 0 {
+	if buf.Allows(FLAG_ABI_0_PARAM) && len(bytes) <= 6*32+4 && (len(bytes)-4)%32 == 0 {
 		buf.commitUint(FLAG_ABI_0_PARAM + uint((len(bytes)-4)/32))
 		buf.commitBytes(buf.Encode4Bytes(bytes[:4]))
 		buf.end(bytes, Stateless)
@@ -905,7 +913,7 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If the bytes are a multiple of 32 + 4 bytes (max 256 * 32 + 4) then it
 	// can be represented using dynamic encoded ABI
-	if len(bytes) <= 256*32+4 && (len(bytes)-4)%32 == 0 {
+	if buf.Allows(FLAG_READ_DYNAMIC_ABI) && len(bytes) <= 256*32+4 && (len(bytes)-4)%32 == 0 {
 		buf.commitUint(FLAG_READ_DYNAMIC_ABI)
 		buf.commitBytes(buf.Encode4Bytes(bytes[:4]))
 		buf.commitUint(uint((len(bytes) - 4) / 32)) // The number of ARGs

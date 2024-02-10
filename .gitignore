@@ -12,3 +12,6 @@ docs/
 
 # Dotenv file
 .env
+
+# Go build files for testing
+build/

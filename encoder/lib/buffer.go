@@ -8,6 +8,11 @@ type Indexes struct {
 	Bytes4Indexes  map[string]uint
 }
 
+type AllowOpcodes struct {
+	Default bool
+	List    map[uint]bool
+}
+
 type Buffer struct {
 	Commited []byte
 	Pending  []byte
@@ -16,6 +21,7 @@ type Buffer struct {
 }
 
 type References struct {
+	AllowOpcodes       *AllowOpcodes
 	useContractStorage bool
 
 	Indexes *Indexes
@@ -24,7 +30,7 @@ type References struct {
 	usedStorageFlags map[string]int
 }
 
-func NewBuffer(method uint, indexes *Indexes, useStorage bool) *Buffer {
+func NewBuffer(method uint, indexes *Indexes, allowOpcodes *AllowOpcodes, useStorage bool) *Buffer {
 	if indexes == nil {
 		indexes = &Indexes{
 			AddressIndexes: make(map[string]uint),
@@ -41,6 +47,7 @@ func NewBuffer(method uint, indexes *Indexes, useStorage bool) *Buffer {
 		Pending:  make([]byte, 0),
 
 		Refs: &References{
+			AllowOpcodes:       allowOpcodes,
 			Indexes:            indexes,
 			useContractStorage: useStorage,
 			usedFlags:          make(map[string]int),
@@ -61,11 +68,25 @@ func (r *References) Copy() *References {
 	}
 
 	return &References{
+		AllowOpcodes:       r.AllowOpcodes,
+		Indexes:            r.Indexes,
 		useContractStorage: r.useContractStorage,
 
 		usedFlags:        usedFlags,
 		usedStorageFlags: usedStorageFlags,
 	}
+}
+
+func (cb *Buffer) Allows(op uint) bool {
+	if cb.Refs.AllowOpcodes == nil {
+		return true
+	}
+
+	if cb.Refs.AllowOpcodes.List[op] {
+		return !cb.Refs.AllowOpcodes.Default
+	}
+
+	return cb.Refs.AllowOpcodes.Default
 }
 
 func (cb *Buffer) Data() []byte {

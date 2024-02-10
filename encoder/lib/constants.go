@@ -111,6 +111,179 @@ const (
 	FLAG_READ_STORE_FLAG
 )
 
+func FlagNames() map[string]uint {
+	names := make(map[string]uint)
+
+	for i := FLAG_READ_POWER_OF_10_MISC; i <= LITERAL_ZERO; i++ {
+		switch i {
+		case FLAG_READ_POWER_OF_10_MISC:
+			names["FLAG_READ_POWER_OF_10_MISC"] = i
+		case FLAG_READ_BYTES32_1_BYTES:
+			names["FLAG_READ_BYTES32_1_BYTES"] = i
+		case FLAG_READ_BYTES32_2_BYTES:
+			names["FLAG_READ_BYTES32_2_BYTES"] = i
+		case FLAG_READ_BYTES32_3_BYTES:
+			names["FLAG_READ_BYTES32_3_BYTES"] = i
+		case FLAG_READ_BYTES32_4_BYTES:
+			names["FLAG_READ_BYTES32_4_BYTES"] = i
+		case FLAG_READ_BYTES32_5_BYTES:
+			names["FLAG_READ_BYTES32_5_BYTES"] = i
+		case FLAG_READ_BYTES32_6_BYTES:
+			names["FLAG_READ_BYTES32_6_BYTES"] = i
+		case FLAG_READ_BYTES32_7_BYTES:
+			names["FLAG_READ_BYTES32_7_BYTES"] = i
+		case FLAG_READ_BYTES32_8_BYTES:
+			names["FLAG_READ_BYTES32_8_BYTES"] = i
+		case FLAG_READ_BYTES32_9_BYTES:
+			names["FLAG_READ_BYTES32_9_BYTES"] = i
+		case FLAG_READ_BYTES32_10_BYTES:
+			names["FLAG_READ_BYTES32_10_BYTES"] = i
+		case FLAG_READ_BYTES32_11_BYTES:
+			names["FLAG_READ_BYTES32_11_BYTES"] = i
+		case FLAG_READ_BYTES32_12_BYTES:
+			names["FLAG_READ_BYTES32_12_BYTES"] = i
+		case FLAG_READ_BYTES32_13_BYTES:
+			names["FLAG_READ_BYTES32_13_BYTES"] = i
+		case FLAG_READ_BYTES32_14_BYTES:
+			names["FLAG_READ_BYTES32_14_BYTES"] = i
+		case FLAG_READ_BYTES32_15_BYTES:
+			names["FLAG_READ_BYTES32_15_BYTES"] = i
+		case FLAG_READ_BYTES32_16_BYTES:
+			names["FLAG_READ_BYTES32_16_BYTES"] = i
+		case FLAG_READ_BYTES32_17_BYTES:
+			names["FLAG_READ_BYTES32_17_BYTES"] = i
+		case FLAG_READ_BYTES32_18_BYTES:
+			names["FLAG_READ_BYTES32_18_BYTES"] = i
+		case FLAG_READ_BYTES32_19_BYTES:
+			names["FLAG_READ_BYTES32_19_BYTES"] = i
+		case FLAG_READ_BYTES32_20_BYTES:
+			names["FLAG_READ_BYTES32_20_BYTES"] = i
+		case FLAG_READ_BYTES32_21_BYTES:
+			names["FLAG_READ_BYTES32_21_BYTES"] = i
+		case FLAG_READ_BYTES32_22_BYTES:
+			names["FLAG_READ_BYTES32_22_BYTES"] = i
+		case FLAG_READ_BYTES32_23_BYTES:
+			names["FLAG_READ_BYTES32_23_BYTES"] = i
+		case FLAG_READ_BYTES32_24_BYTES:
+			names["FLAG_READ_BYTES32_24_BYTES"] = i
+		case FLAG_READ_BYTES32_25_BYTES:
+			names["FLAG_READ_BYTES32_25_BYTES"] = i
+		case FLAG_READ_BYTES32_26_BYTES:
+			names["FLAG_READ_BYTES32_26_BYTES"] = i
+		case FLAG_READ_BYTES32_27_BYTES:
+			names["FLAG_READ_BYTES32_27_BYTES"] = i
+		case FLAG_READ_BYTES32_28_BYTES:
+			names["FLAG_READ_BYTES32_28_BYTES"] = i
+		case FLAG_READ_BYTES32_29_BYTES:
+			names["FLAG_READ_BYTES32_29_BYTES"] = i
+		case FLAG_READ_BYTES32_30_BYTES:
+			names["FLAG_READ_BYTES32_30_BYTES"] = i
+		case FLAG_READ_BYTES32_31_BYTES:
+			names["FLAG_READ_BYTES32_31_BYTES"] = i
+		case FLAG_READ_BYTES32_32_BYTES:
+			names["FLAG_READ_BYTES32_32_BYTES"] = i
+		case FLAG_SAVE_ADDRESS:
+			names["FLAG_SAVE_ADDRESS"] = i
+		case FLAG_SAVE_BYTES32:
+			names["FLAG_SAVE_BYTES32"] = i
+		case FLAG_READ_ADDRESS_2:
+			names["FLAG_READ_ADDRESS_2"] = i
+		case FLAG_READ_ADDRESS_3:
+			names["FLAG_READ_ADDRESS_3"] = i
+		case FLAG_READ_ADDRESS_4:
+			names["FLAG_READ_ADDRESS_4"] = i
+		case FLAG_READ_EXECUTE:
+			names["FLAG_READ_EXECUTE"] = i
+		case FLAG_READ_BYTES32_2:
+			names["FLAG_READ_BYTES32_2"] = i
+		case FLAG_READ_BYTES32_3:
+			names["FLAG_READ_BYTES32_3"] = i
+		case FLAG_READ_BYTES32_4:
+			names["FLAG_READ_BYTES32_4"] = i
+		case FLAG_READ_POW_10_MANTISSA:
+			names["FLAG_READ_POW_10_MANTISSA"] = i
+		case FLAG_READ_N_BYTES:
+			names["FLAG_READ_N_BYTES"] = i
+		case FLAG_READ_POWER_OF_2:
+			names["FLAG_READ_POWER_OF_2"] = i
+		case FLAG_ABI_0_PARAM:
+			names["FLAG_ABI_0_PARAM"] = i
+		case FLAG_ABI_1_PARAM:
+			names["FLAG_ABI_1_PARAM"] = i
+		case FLAG_ABI_2_PARAMS:
+			names["FLAG_ABI_2_PARAMS"] = i
+		case FLAG_ABI_3_PARAMS:
+			names["FLAG_ABI_3_PARAMS"] = i
+		case FLAG_ABI_4_PARAMS:
+			names["FLAG_ABI_4_PARAMS"] = i
+		case FLAG_ABI_5_PARAMS:
+			names["FLAG_ABI_5_PARAMS"] = i
+		case FLAG_ABI_6_PARAMS:
+			names["FLAG_ABI_6_PARAMS"] = i
+		case FLAG_NESTED_N_FLAGS_8:
+			names["FLAG_NESTED_N_FLAGS_8"] = i
+		case FLAG_NESTED_N_FLAGS_16:
+			names["FLAG_NESTED_N_FLAGS_16"] = i
+		case FLAG_SIGNATURE_W0:
+			names["FLAG_SIGNATURE_W0"] = i
+		case FLAG_SIGNATURE_W1:
+			names["FLAG_SIGNATURE_W1"] = i
+		case FLAG_SIGNATURE_W2:
+			names["FLAG_SIGNATURE_W2"] = i
+		case FLAG_SIGNATURE_W3:
+			names["FLAG_SIGNATURE_W3"] = i
+		case FLAG_SIGNATURE_W4:
+			names["FLAG_SIGNATURE_W4"] = i
+		case FLAG_ADDRESS_W0:
+			names["FLAG_ADDRESS_W0"] = i
+		case FLAG_ADDRESS_W1:
+			names["FLAG_ADDRESS_W1"] = i
+		case FLAG_ADDRESS_W2:
+			names["FLAG_ADDRESS_W2"] = i
+		case FLAG_ADDRESS_W3:
+			names["FLAG_ADDRESS_W3"] = i
+		case FLAG_ADDRESS_W4:
+			names["FLAG_ADDRESS_W4"] = i
+		case FLAG_NODE:
+			names["FLAG_NODE"] = i
+		case FLAG_BRANCH:
+			names["FLAG_BRANCH"] = i
+		case FLAG_SUBDIGEST:
+			names["FLAG_SUBDIGEST"] = i
+		case FLAG_NESTED:
+			names["FLAG_NESTED"] = i
+		case FLAG_DYNAMIC_SIGNATURE:
+			names["FLAG_DYNAMIC_SIGNATURE"] = i
+		case FLAG_S_SIG_NO_CHAIN:
+			names["FLAG_S_SIG_NO_CHAIN"] = i
+		case FLAG_S_SIG:
+			names["FLAG_S_SIG"] = i
+		case FLAG_S_L_SIG_NO_CHAIN:
+			names["FLAG_S_L_SIG_NO_CHAIN"] = i
+		case FLAG_S_L_SIG:
+			names["FLAG_S_L_SIG"] = i
+		case FLAG_READ_CHAINED:
+			names["FLAG_READ_CHAINED"] = i
+		case FLAG_READ_CHAINED_L:
+			names["FLAG_READ_CHAINED_L"] = i
+		case FLAG_READ_DYNAMIC_ABI:
+			names["FLAG_READ_DYNAMIC_ABI"] = i
+		case FLAG_NO_OP:
+			names["FLAG_NO_OP"] = i
+		case FLAG_MIRROR_FLAG:
+			names["FLAG_MIRROR_FLAG"] = i
+		case FLAG_COPY_CALLDATA:
+			names["FLAG_COPY_CALLDATA"] = i
+		case FLAG_READ_STORE_FLAG:
+			names["FLAG_READ_STORE_FLAG"] = i
+		case LITERAL_ZERO:
+			names["LITERAL_ZERO"] = i
+		}
+	}
+
+	return names
+}
+
 const LITERAL_ZERO = FLAG_READ_STORE_FLAG + 1
 const MAX_LITERAL = 0xff - LITERAL_ZERO
 

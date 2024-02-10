@@ -37,6 +37,7 @@ func main() {
 	}
 
 	if err != nil {
+		fmt.Print("Error: ")
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -46,14 +47,18 @@ func main() {
 }
 
 func encodeAny(args *cmd.ParsedArgs) (string, error) {
-	buf := encoder.NewBuffer(encoder.METHOD_DECODE_ANY, nil, false)
+	buf := encoder.NewBuffer(encoder.METHOD_DECODE_ANY, nil, cmd.ParseAllowOpcodes(args), cmd.ParseUseStorage(args))
 
 	if len(args.Positional) < 2 {
 		return "", fmt.Errorf("usage: encode_any <hex>")
 	}
 
 	input := common.FromHex(args.Positional[1])
-	buf.WriteBytesOptimized(input, true)
+	_, err := buf.WriteBytesOptimized(input, true)
+	if err != nil {
+		return "", err
+	}
+
 	return fmt.Sprintf("0x%x", buf.Commited), nil
 }
 

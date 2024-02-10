@@ -92,7 +92,7 @@ func isPow10Mantissa(b []byte, maxExp int, maxMantissa int) (int, int) {
 	maxByteValue := big.NewInt(int64(maxMantissa))
 	zero := big.NewInt(0)
 
-	for n = 0; n < maxExp; n++ {
+	for n = 1; n < maxExp; n++ {
 		powerOfTen := new(big.Int).Exp(ten, big.NewInt(int64(n)), nil)
 
 		if powerOfTen.Cmp(num) > 0 {

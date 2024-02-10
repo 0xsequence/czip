@@ -3,6 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
+
+	encoder "github.com/0xsequence/compressor/encoder/lib"
 )
 
 type ParsedArgs struct {
@@ -40,4 +43,82 @@ func ParseArgs() (*ParsedArgs, error) {
 	}
 
 	return res, nil
+}
+
+func FindOpcodesForFlag(flag string) []uint {
+	res := make([]uint, 0)
+
+	for val, op := range encoder.FlagNames() {
+		// Fuzzy match
+		if strings.Contains(strings.ToLower(val), strings.ToLower(flag)) {
+			res = append(res, op)
+		}
+	}
+
+	if len(res) == 0 {
+		fmt.Println("Error: Invalid opcode flag", flag)
+		os.Exit(1)
+	}
+
+	return res
+}
+
+func ParseUseStorage(args *ParsedArgs) bool {
+	// One possible flag `--use-storage`
+	// If defined, then return true, otherwise false
+	val := strings.ToLower(args.Flags["use-storage"])
+
+	switch val {
+	case "":
+		return true
+	case "true":
+		return true
+	case "false":
+		return false
+	}
+
+	fmt.Println("Invalid value for use-storage")
+	os.Exit(1)
+	return false
+}
+
+func ParseAllowOpcodes(args *ParsedArgs) *encoder.AllowOpcodes {
+	// Two possible flags `--allow-opcodes` and `--disallow-opcodes`
+	// values are separated by commas, and expressed as strings
+	// e.g. `--allow-opcodes SIGNATURE_W4,SIG_NO_CHAIN`
+	// If allow is defined, then default is disallow
+	// and vice versa, both cannot be defined at the same time
+	allow := args.Flags["allow-opcodes"]
+	disallow := args.Flags["disallow-opcodes"]
+
+	if allow != "" && disallow != "" {
+		fmt.Println("Cannot define both allow-opcodes and disallow-opcodes")
+		os.Exit(1)
+	}
+
+	if allow == "" && disallow == "" {
+		return nil
+	}
+
+	var res encoder.AllowOpcodes
+	res.List = make(map[uint]bool)
+	var val string
+
+	if allow != "" {
+		val = allow
+		res.Default = false
+	} else {
+		val = disallow
+		res.Default = true
+	}
+
+	parts := strings.Split(val, ",")
+	for _, part := range parts {
+		opcodes := FindOpcodesForFlag(part)
+		for _, opcode := range opcodes {
+			res.List[opcode] = true
+		}
+	}
+
+	return &res
 }

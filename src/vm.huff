@@ -477,7 +477,6 @@
 
   default:
     // The default just pushes the flag as a byte (padded to 32 bytes)
-    // notice that we start at 0x01 since 0x00 can be pushed with the flag 0x00
     [HIGHEST_FLAG_PLUS_ONE] // [HIGHEST_FLAG_PLUS_ONE, flag, windex, rindex, jump_to]
     swap1 sub               // [flag - HIGHEST_FLAG_PLUS_ONE, windex, rindex, jump_to]
     dup2                    // [windex, flag - HIGHEST_FLAG_PLUS_ONE, windex, rindex, jump_to]
