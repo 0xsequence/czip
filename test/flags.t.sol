@@ -315,4 +315,15 @@ contract FlagsTest is Test {
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
   }
+
+  function test_sequenceDynamicSignature(address _addr, uint8 _weight, bytes memory _sig) external {
+    vm.assume(_sig.length < type(uint24).max);
+    bytes memory data = abi.encodePacked(_addr, _weight, _sig, uint8(0x03));
+    bytes memory expect = abi.encodePacked(uint8(0x02), uint8(_weight), _addr, uint24(_sig.length + 1), _sig, uint8(0x03));
+    bytes memory encoded = vm.encodeExtra("SEQUENCE_DYNAMIC_SIGNATURE_PART", data)
+      .useStorage(false)
+      .run();
+    bytes memory decoded = decode(encoded);
+    assertEq(expect, decoded);
+  }
 }
