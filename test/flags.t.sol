@@ -291,4 +291,28 @@ contract FlagsTest is Test {
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
   }
+
+  function test_sequenceNode(bytes32 _node) external {
+    bytes memory data = abi.encodePacked(uint8(0x03), _node);
+    bytes memory encoded = vm.encodeAny(data)
+      .useStorage(false)
+      .allowOps("FLAG_NODE")
+      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("LITERAL_ZERO")
+      .run();
+    bytes memory decoded = decode(encoded);
+    assertEq(data, decoded);
+  }
+
+  function test_sequenceSubdigest(bytes32 _subdigest) external {
+    bytes memory data = abi.encodePacked(uint8(0x05), _subdigest);
+    bytes memory encoded = vm.encodeAny(data)
+      .useStorage(false)
+      .allowOps("FLAG_SUBDIGEST")
+      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("LITERAL_ZERO")
+      .run();
+    bytes memory decoded = decode(encoded);
+    assertEq(data, decoded);
+  }
 }
