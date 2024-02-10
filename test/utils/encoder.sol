@@ -10,7 +10,7 @@ library Encoder {
 
   function encodeAny(Vm _vm, bytes memory _data) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](3);
-    inputs[0] = "./run_encoder.sh";
+    inputs[0] = "./run_compressor.sh";
     inputs[1] = "encode_any";
     inputs[2] = _vm.toString(_data);
     return CommandBuffer(_vm, inputs);
