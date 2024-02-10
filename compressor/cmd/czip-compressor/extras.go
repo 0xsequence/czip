@@ -1,9 +1,9 @@
-package cmd
+package main
 
 import (
 	"fmt"
 
-	encoder "github.com/0xsequence/compressor/encoder/lib"
+	encoder "github.com/0xsequence/czip/compressor"
 	"github.com/0xsequence/ethkit/go-ethereum/common"
 )
 
