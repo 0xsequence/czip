@@ -31,7 +31,7 @@ func main() {
 	case "encode_any":
 		res, err = encodeAny(args)
 	case "extras":
-		res, err = EncodeExtras(args)
+		res, err = encodeExtras(args)
 	default:
 		fmt.Println("Usage: encode_sequence_tx / encode_call / encode_calls / encode_any / extras ")
 		os.Exit(1)

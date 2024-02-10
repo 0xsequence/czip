@@ -7,7 +7,7 @@ import (
 	"github.com/0xsequence/ethkit/go-ethereum/common"
 )
 
-func EncodeExtras(args *ParsedArgs) (string, error) {
+func encodeExtras(args *ParsedArgs) (string, error) {
 	if len(args.Positional) < 3 {
 		return "", fmt.Errorf("usage: encode_extra <code> <hex>")
 	}
