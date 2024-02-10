@@ -230,6 +230,43 @@ func (buf *Buffer) EncodeWordBytes32(word []byte) ([]byte, EncodeType, error) {
 	return encodedWord, Stateless, nil
 }
 
+// Encodes N words
+func (buf *Buffer) WriteNWords(words []byte) (EncodeType, error) {
+	count := len(words) / 32
+	if len(words)%32 != 0 {
+		return Stateless, fmt.Errorf("words are not aligned to 32 bytes")
+	}
+
+	if count == 0 {
+		return Stateless, fmt.Errorf("words are empty")
+	}
+
+	if count <= 255 {
+		buf.commitUint(FLAG_NESTED_N_FLAGS_S)
+		buf.commitByte(byte(count))
+	} else if count <= 65535 {
+		buf.commitUint(FLAG_NESTED_N_FLAGS_L)
+		buf.commitByte(byte(count >> 8))
+		buf.commitByte(byte(count))
+	} else {
+		return Stateless, fmt.Errorf("too many words")
+	}
+
+	buf.end([]byte{}, Stateless)
+
+	encodeType := Stateless
+	for i := 0; i < count; i++ {
+		encoded, err := buf.WriteWord(words[i*32:i*32+32], buf.Refs.useContractStorage)
+		if err != nil {
+			return Stateless, err
+		}
+
+		encodeType = maxPriority(encodeType, encoded)
+	}
+
+	return encodeType, nil
+}
+
 // Encodes and writes a word to the buffer
 func (buf *Buffer) WriteWord(word []byte, useStorage bool) (EncodeType, error) {
 	encoded, t, err := buf.EncodeWordOptimized(word, useStorage)
@@ -567,11 +604,11 @@ func (buf *Buffer) WriteSequenceSignatureTree(tree []byte) (EncodeType, error) {
 
 	if totalParts > 1 {
 		if totalParts > 255 {
-			buf.commitUint(FLAG_NESTED_N_FLAGS_16)
+			buf.commitUint(FLAG_NESTED_N_FLAGS_L)
 			buf.commitByte(byte(totalParts >> 8))
 			buf.commitByte(byte(totalParts))
 		} else {
-			buf.commitUint(FLAG_NESTED_N_FLAGS_8)
+			buf.commitUint(FLAG_NESTED_N_FLAGS_S)
 			buf.commitByte(byte(totalParts))
 		}
 	}

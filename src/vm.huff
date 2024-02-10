@@ -130,8 +130,8 @@
   FLAG_ABI_4_PARAMS          // 0x31
   FLAG_ABI_5_PARAMS          // 0x32
   FLAG_ABI_6_PARAMS          // 0x33
-  FLAG_NESTED_N_FLAGS_8      // 0x34
-  FLAG_NESTED_N_FLAGS_16     // 0x35
+  FLAG_NESTED_N_FLAGS_S      // 0x34
+  FLAG_NESTED_N_FLAGS_L     // 0x35
   // start: Signature specific methods
   FLAG_SIGNATURE_W0          // 0x36
   FLAG_SIGNATURE_W1          // 0x37
@@ -383,11 +383,11 @@
     READ_ABI_6(<nrfs>)
     end jump
     
-  FLAG_NESTED_N_FLAGS_8:
-    READ_NESTED_N_FLAGS_8(<nrfs>)
+  FLAG_NESTED_N_FLAGS_S:
+    READ_NESTED_N_FLAGS_S(<nrfs>)
     end jump 
-  FLAG_NESTED_N_FLAGS_16:
-    READ_NESTED_N_FLAGS_16(<nrfs>)
+  FLAG_NESTED_N_FLAGS_L:
+    READ_NESTED_N_FLAGS_L(<nrfs>)
     end jump 
 
   FLAG_SIGNATURE_W0:
@@ -707,7 +707,7 @@
   // output stack: [mem[windex - 0x20], windex - 0x20]
 }
 
-#define macro READ_NESTED_N_FLAGS_8(nrfs) = takes (2) returns (2) {
+#define macro READ_NESTED_N_FLAGS_S(nrfs) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
   swap1         // [rindex, windex]
@@ -719,7 +719,7 @@
   // output stack: [windex, rindex]
 }
 
-#define macro READ_NESTED_N_FLAGS_16(nrfs) = takes (2) returns (2) {
+#define macro READ_NESTED_N_FLAGS_L(nrfs) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
   swap1       // [rindex, windex]
