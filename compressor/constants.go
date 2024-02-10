@@ -1,4 +1,4 @@
-package encoder
+package compressor
 
 import "github.com/0xsequence/ethkit/go-ethereum/common"
 

@@ -1,11 +1,11 @@
-package cmd
+package main
 
 import (
 	"fmt"
 	"os"
 	"strings"
 
-	encoder "github.com/0xsequence/compressor/encoder/lib"
+	encoder "github.com/0xsequence/czip/compressor"
 )
 
 type ParsedArgs struct {
