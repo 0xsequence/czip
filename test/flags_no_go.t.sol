@@ -5,14 +5,14 @@ import "forge-std/Test.sol";
 
 import "./utils/encoder.sol";
 
-uint8 constant DECODE_ANY                 = 0x0d;
+uint8 constant DECODE_ANY             = 0x0d;
 
-uint8 constant FLAG_READ_BYTES32_1_BYTES  = 0x01;
-uint8 constant FLAG_READ_BYTES32_32_BYTES = 0x20;
-uint8 constant FLAG_READ_N_BYTES          = 0x2b;
-uint8 constant FLAG_NESTED_N_FLAGS_S      = 0x34;
-uint8 constant FLAG_COPY_CALLDATA         = 0x4e;
-uint8 constant FLAG_MIRROR_FLAG           = 0x4f;
+uint8 constant FLAG_READ_WORD_1       = 0x01;
+uint8 constant FLAG_READ_WORD_32      = 0x20;
+uint8 constant FLAG_READ_N_BYTES      = 0x2b;
+uint8 constant FLAG_NESTED_N_FLAGS_S  = 0x34;
+uint8 constant FLAG_COPY_CALLDATA     = 0x4e;
+uint8 constant FLAG_MIRROR_FLAG       = 0x4f;
 
 contract FlagsTestNoGo is Test {
   using Encoder for Encoder.CommandBuffer;
@@ -41,7 +41,7 @@ contract FlagsTestNoGo is Test {
       FLAG_NESTED_N_FLAGS_S,
       uint8(0x02),
       FLAG_READ_N_BYTES,
-      FLAG_READ_BYTES32_1_BYTES,
+      FLAG_READ_WORD_1,
       uint8(_part.length),
       _part,
       FLAG_COPY_CALLDATA,
@@ -59,7 +59,7 @@ contract FlagsTestNoGo is Test {
       DECODE_ANY,
       FLAG_NESTED_N_FLAGS_S,
       uint8(0x02),
-      FLAG_READ_BYTES32_32_BYTES,
+      FLAG_READ_WORD_32,
       _word,
       FLAG_MIRROR_FLAG,
       uint16(0x03)

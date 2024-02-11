@@ -33,7 +33,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	// If it only has 1 byte, then we encode it as a word
 	// all other methods use 2 bytes anyway
-	if buf.Allows(FLAG_READ_BYTES32_1_BYTES) && len(trimmed) == 1 {
+	if buf.Allows(FLAG_READ_WORD_1) && len(trimmed) == 1 {
 		return buf.EncodeWordBytes32(trimmed)
 	}
 
@@ -58,7 +58,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	}
 
 	// Now we can store words of 2 bytes, we have exhausted all the 1 byte options
-	if buf.Allows(FLAG_READ_BYTES32_1_BYTES) && len(trimmed) <= 2 {
+	if buf.Allows(FLAG_READ_WORD_1) && len(trimmed) <= 2 {
 		return buf.EncodeWordBytes32(trimmed)
 	}
 
@@ -108,7 +108,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	// Now any 3 byte word can be encoded as-is, all the other
 	// methods use more than 3 bytes
-	if buf.Allows(FLAG_READ_BYTES32_1_BYTES) && len(trimmed) <= 3 {
+	if buf.Allows(FLAG_READ_WORD_1) && len(trimmed) <= 3 {
 		return buf.EncodeWordBytes32(trimmed)
 	}
 
@@ -245,11 +245,11 @@ func (buf *Buffer) EncodeWordBytes32(word []byte) ([]byte, EncodeType, error) {
 		return nil, Stateless, fmt.Errorf("word is empty")
 	}
 
-	if !buf.Allows(FLAG_READ_BYTES32_1_BYTES) {
+	if !buf.Allows(FLAG_READ_WORD_1) {
 		return nil, Stateless, fmt.Errorf("bytes32 encoding is not allowed")
 	}
 
-	encodedWord := []byte{byte(FLAG_READ_BYTES32_1_BYTES + uint(len(word)) - 1)}
+	encodedWord := []byte{byte(FLAG_READ_WORD_1 + uint(len(word)) - 1)}
 	encodedWord = append(encodedWord, word...)
 	return encodedWord, Stateless, nil
 }
@@ -267,7 +267,7 @@ func (buf *Buffer) EncodeWordBytes32Inv(word []byte) ([]byte, EncodeType, error)
 		return nil, Stateless, fmt.Errorf("bytes32 INV encoding is not allowed")
 	}
 
-	encodedWord := []byte{byte(FLAG_BYTES32_INV_PADDING), byte(FLAG_READ_BYTES32_1_BYTES + uint(len(word)) - 1)}
+	encodedWord := []byte{byte(FLAG_BYTES32_INV_PADDING), byte(FLAG_READ_WORD_1 + uint(len(word)) - 1)}
 	encodedWord = append(encodedWord, word...)
 	return encodedWord, Stateless, nil
 }

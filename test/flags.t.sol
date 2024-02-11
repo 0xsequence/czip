@@ -36,7 +36,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encode(_word);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -48,7 +48,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encode(_word);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .allowOps("FLAG_BYTES32_INV_PADDING")
       .run();
     bytes memory decoded = decode(encoded);
@@ -144,7 +144,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -157,7 +157,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -176,7 +176,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -197,7 +197,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -220,7 +220,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -245,7 +245,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -262,7 +262,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_READ_DYNAMIC_ABI")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decode(encoded);
@@ -276,7 +276,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encodePacked(_words);
     bytes memory encoded = vm.encodeExtra("FLAG_NESTED_N_WORDS", data)
       .useStorage(false)
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decode(encoded);
@@ -288,7 +288,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ADDRESS")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decode(encoded);
@@ -310,7 +310,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_NODE")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decode(encoded);
@@ -322,7 +322,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_SUBDIGEST")
-      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decode(encoded);

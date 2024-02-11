@@ -79,38 +79,38 @@
 
 #define jumptable__packed FLAG_TABLE {
   FLAG_READ_POW_10_MANTISSA_S // 0x00
-  FLAG_READ_BYTES32_1_BYTES  // 0x01
-  FLAG_READ_BYTES32_2_BYTES  // 0x02
-  FLAG_READ_BYTES32_3_BYTES  // 0x03
-  FLAG_READ_BYTES32_4_BYTES  // 0x04
-  FLAG_READ_BYTES32_5_BYTES  // 0x05
-  FLAG_READ_BYTES32_6_BYTES  // 0x06
-  FLAG_READ_BYTES32_7_BYTES  // 0x07
-  FLAG_READ_BYTES32_8_BYTES  // 0x08
-  FLAG_READ_BYTES32_9_BYTES  // 0x09
-  FLAG_READ_BYTES32_10_BYTES // 0x0a
-  FLAG_READ_BYTES32_11_BYTES // 0x0b
-  FLAG_READ_BYTES32_12_BYTES // 0x0c
-  FLAG_READ_BYTES32_13_BYTES // 0x0d
-  FLAG_READ_BYTES32_14_BYTES // 0x0e
-  FLAG_READ_BYTES32_15_BYTES // 0x0f
-  FLAG_READ_BYTES32_16_BYTES // 0x10
-  FLAG_READ_BYTES32_17_BYTES // 0x11
-  FLAG_READ_BYTES32_18_BYTES // 0x12
-  FLAG_READ_BYTES32_19_BYTES // 0x13
-  FLAG_READ_BYTES32_20_BYTES // 0x14
-  FLAG_READ_BYTES32_21_BYTES // 0x15
-  FLAG_READ_BYTES32_22_BYTES // 0x16
-  FLAG_READ_BYTES32_23_BYTES // 0x17
-  FLAG_READ_BYTES32_24_BYTES // 0x18
-  FLAG_READ_BYTES32_25_BYTES // 0x19
-  FLAG_READ_BYTES32_26_BYTES // 0x1a
-  FLAG_READ_BYTES32_27_BYTES // 0x1b
-  FLAG_READ_BYTES32_28_BYTES // 0x1c
-  FLAG_READ_BYTES32_29_BYTES // 0x1d
-  FLAG_READ_BYTES32_30_BYTES // 0x1e
-  FLAG_READ_BYTES32_31_BYTES // 0x1f
-  FLAG_READ_BYTES32_32_BYTES // 0x20
+  FLAG_READ_WORD_1  // 0x01
+  FLAG_READ_WORD_2  // 0x02
+  FLAG_READ_WORD_3  // 0x03
+  FLAG_READ_WORD_4  // 0x04
+  FLAG_READ_WORD_5  // 0x05
+  FLAG_READ_WORD_6  // 0x06
+  FLAG_READ_WORD_7  // 0x07
+  FLAG_READ_WORD_8  // 0x08
+  FLAG_READ_WORD_9  // 0x09
+  FLAG_READ_WORD_10 // 0x0a
+  FLAG_READ_WORD_11 // 0x0b
+  FLAG_READ_WORD_12 // 0x0c
+  FLAG_READ_WORD_13 // 0x0d
+  FLAG_READ_WORD_14 // 0x0e
+  FLAG_READ_WORD_15 // 0x0f
+  FLAG_READ_WORD_16 // 0x10
+  FLAG_READ_WORD_17 // 0x11
+  FLAG_READ_WORD_18 // 0x12
+  FLAG_READ_WORD_19 // 0x13
+  FLAG_READ_WORD_20 // 0x14
+  FLAG_READ_WORD_21 // 0x15
+  FLAG_READ_WORD_22 // 0x16
+  FLAG_READ_WORD_23 // 0x17
+  FLAG_READ_WORD_24 // 0x18
+  FLAG_READ_WORD_25 // 0x19
+  FLAG_READ_WORD_26 // 0x1a
+  FLAG_READ_WORD_27 // 0x1b
+  FLAG_READ_WORD_28 // 0x1c
+  FLAG_READ_WORD_29 // 0x1d
+  FLAG_READ_WORD_30 // 0x1e
+  FLAG_READ_WORD_31 // 0x1f
+  FLAG_READ_WORD_32 // 0x20
   FLAG_SAVE_ADDRESS          // 0x21
   FLAG_SAVE_BYTES32          // 0x22
   FLAG_READ_ADDRESS_2        // 0x23
@@ -222,101 +222,101 @@
     __tablestart(POW_10_TABLE)
     READ_POW_10_MANTISSA_S()
     end jump
-  FLAG_READ_BYTES32_1_BYTES:
-    READ_BYTES32(0xf8, 0x01)
+  FLAG_READ_WORD_1:
+    READ_WORD(0xf8, 0x01)
     end jump
-  FLAG_READ_BYTES32_2_BYTES:
-    READ_BYTES32(0xf0, 0x02)
+  FLAG_READ_WORD_2:
+    READ_WORD(0xf0, 0x02)
     end jump
-  FLAG_READ_BYTES32_3_BYTES:
-    READ_BYTES32(0xe8, 0x03)
+  FLAG_READ_WORD_3:
+    READ_WORD(0xe8, 0x03)
     end jump
-  FLAG_READ_BYTES32_4_BYTES:
-    READ_BYTES32(0xe0, 0x04)
+  FLAG_READ_WORD_4:
+    READ_WORD(0xe0, 0x04)
     end jump
-  FLAG_READ_BYTES32_5_BYTES:
-    READ_BYTES32(0xd8, 0x05)
+  FLAG_READ_WORD_5:
+    READ_WORD(0xd8, 0x05)
     end jump
-  FLAG_READ_BYTES32_6_BYTES:
-    READ_BYTES32(0xd0, 0x06)
+  FLAG_READ_WORD_6:
+    READ_WORD(0xd0, 0x06)
     end jump
-  FLAG_READ_BYTES32_7_BYTES:
-    READ_BYTES32(0xc8, 0x07)
+  FLAG_READ_WORD_7:
+    READ_WORD(0xc8, 0x07)
     end jump
-  FLAG_READ_BYTES32_8_BYTES:
-    READ_BYTES32(0xc0, 0x08)
+  FLAG_READ_WORD_8:
+    READ_WORD(0xc0, 0x08)
     end jump
-  FLAG_READ_BYTES32_9_BYTES:
-    READ_BYTES32(0xb8, 0x09)
+  FLAG_READ_WORD_9:
+    READ_WORD(0xb8, 0x09)
     end jump
-  FLAG_READ_BYTES32_10_BYTES:
-    READ_BYTES32(0xb0, 0x0a)
+  FLAG_READ_WORD_10:
+    READ_WORD(0xb0, 0x0a)
     end jump
-  FLAG_READ_BYTES32_11_BYTES:
-    READ_BYTES32(0xa8, 0x0b)
+  FLAG_READ_WORD_11:
+    READ_WORD(0xa8, 0x0b)
     end jump
-  FLAG_READ_BYTES32_12_BYTES:
-    READ_BYTES32(0xa0, 0x0c)
+  FLAG_READ_WORD_12:
+    READ_WORD(0xa0, 0x0c)
     end jump
-  FLAG_READ_BYTES32_13_BYTES:
-    READ_BYTES32(0x98, 0x0d)
+  FLAG_READ_WORD_13:
+    READ_WORD(0x98, 0x0d)
     end jump
-  FLAG_READ_BYTES32_14_BYTES:
-    READ_BYTES32(0x90, 0x0e)
+  FLAG_READ_WORD_14:
+    READ_WORD(0x90, 0x0e)
     end jump
-  FLAG_READ_BYTES32_15_BYTES:
-    READ_BYTES32(0x88, 0x0f)
+  FLAG_READ_WORD_15:
+    READ_WORD(0x88, 0x0f)
     end jump
-  FLAG_READ_BYTES32_16_BYTES:
-    READ_BYTES32(0x80, 0x10)
+  FLAG_READ_WORD_16:
+    READ_WORD(0x80, 0x10)
     end jump
-  FLAG_READ_BYTES32_17_BYTES:
-    READ_BYTES32(0x78, 0x11)
+  FLAG_READ_WORD_17:
+    READ_WORD(0x78, 0x11)
     end jump
-  FLAG_READ_BYTES32_18_BYTES:
-    READ_BYTES32(0x70, 0x12)
+  FLAG_READ_WORD_18:
+    READ_WORD(0x70, 0x12)
     end jump
-  FLAG_READ_BYTES32_19_BYTES:
-    READ_BYTES32(0x68, 0x13)
+  FLAG_READ_WORD_19:
+    READ_WORD(0x68, 0x13)
     end jump
-  FLAG_READ_BYTES32_20_BYTES:
-    READ_BYTES32(0x60, 0x14)
+  FLAG_READ_WORD_20:
+    READ_WORD(0x60, 0x14)
     end jump
-  FLAG_READ_BYTES32_21_BYTES:
-    READ_BYTES32(0x58, 0x15)
+  FLAG_READ_WORD_21:
+    READ_WORD(0x58, 0x15)
     end jump
-  FLAG_READ_BYTES32_22_BYTES:
-    READ_BYTES32(0x50, 0x16)
+  FLAG_READ_WORD_22:
+    READ_WORD(0x50, 0x16)
     end jump
-  FLAG_READ_BYTES32_23_BYTES:
-    READ_BYTES32(0x48, 0x17)
+  FLAG_READ_WORD_23:
+    READ_WORD(0x48, 0x17)
     end jump
-  FLAG_READ_BYTES32_24_BYTES:
-    READ_BYTES32(0x40, 0x18)
+  FLAG_READ_WORD_24:
+    READ_WORD(0x40, 0x18)
     end jump
-  FLAG_READ_BYTES32_25_BYTES:
-    READ_BYTES32(0x38, 0x19)
+  FLAG_READ_WORD_25:
+    READ_WORD(0x38, 0x19)
     end jump
-  FLAG_READ_BYTES32_26_BYTES:
-    READ_BYTES32(0x30, 0x1a)
+  FLAG_READ_WORD_26:
+    READ_WORD(0x30, 0x1a)
     end jump
-  FLAG_READ_BYTES32_27_BYTES:
-    READ_BYTES32(0x28, 0x1b)
+  FLAG_READ_WORD_27:
+    READ_WORD(0x28, 0x1b)
     end jump
-  FLAG_READ_BYTES32_28_BYTES:
-    READ_BYTES32(0x20, 0x1c)
+  FLAG_READ_WORD_28:
+    READ_WORD(0x20, 0x1c)
     end jump
-  FLAG_READ_BYTES32_29_BYTES:
-    READ_BYTES32(0x18, 0x1d)
+  FLAG_READ_WORD_29:
+    READ_WORD(0x18, 0x1d)
     end jump
-  FLAG_READ_BYTES32_30_BYTES:
-    READ_BYTES32(0x10, 0x1e)
+  FLAG_READ_WORD_30:
+    READ_WORD(0x10, 0x1e)
     end jump
-  FLAG_READ_BYTES32_31_BYTES:
-    READ_BYTES32(0x08, 0x1f)
+  FLAG_READ_WORD_31:
+    READ_WORD(0x08, 0x1f)
     end jump
-  FLAG_READ_BYTES32_32_BYTES:
-    READ_BYTES32_WORD()
+  FLAG_READ_WORD_32:
+    READ_FULL_WORD()
     end jump
 
   FLAG_SAVE_ADDRESS:
@@ -1968,7 +1968,7 @@
   // output stack: [0x20 + windex, valB + rindex]
 }
 
-#define macro READ_BYTES32(shift_bits, read_bytes) = takes (2) returns (2) {
+#define macro READ_WORD(shift_bits, read_bytes) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
   0x20              // [0x20, windex, rindex]
@@ -1992,7 +1992,7 @@
   // output stack: [0x20 + windex, valB + rindex]
 }
 
-#define macro READ_BYTES32_WORD() = takes (3) returns (2) {
+#define macro READ_FULL_WORD() = takes (3) returns (2) {
   // input stack: [windex, rindex]
 
   0x20           // [0x20, windex, rindex]
@@ -2474,11 +2474,11 @@
 }
 
 #[calldata("0xb2d10eb37ef5838bb835ea71bbd4053daf8de7bd8ecdf638451a2bc966a145a8")]
-#define test TEST_FLAG_READ_BYTES32() = {
+#define test TEST_FLAG_READ_WORD() = {
   0x01            // [rindex]
   [FMS] 0x40 add  // [windex, rindex]
 
-  READ_BYTES32(0xf0, 0x02)      // [windex, rindex]
+  READ_WORD(0xf0, 0x02)      // [windex, rindex]
 
   [FMS] 0x60 add eq ASSERT()    // [rindex]
   0x03 eq ASSERT()                            // []
@@ -2488,7 +2488,7 @@
   0x00  // [rindex]
   [FMS] // [windex, rindex]
 
-  READ_BYTES32(0x00, 0x20) // [windex, rindex]
+  READ_WORD(0x00, 0x20) // [windex, rindex]
 
   [FMS] 0x20 add eq ASSERT()    // [rindex]
   0x20 eq ASSERT()              // []
@@ -2498,7 +2498,7 @@
   0x00           // [rindex]
   [FMS] 0x40 add // [windex, rindex]
 
-  READ_BYTES32_WORD() // [windex, rindex]
+  READ_FULL_WORD() // [windex, rindex]
 
   [FMS] 0x60 add eq ASSERT()    // [rindex]
   0x20 eq ASSERT()              // []
