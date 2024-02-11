@@ -63,7 +63,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	}
 
 	// Trimmed right inv uses 1 extra byte (so 2 bytes overhead)
-	if buf.Allows(FLAG_BYTES32_INV_PADDING) && len(trimmedRight) == 1 {
+	if buf.Allows(FLAG_READ_WORD_INV) && len(trimmedRight) == 1 {
 		return buf.EncodeWordBytes32Inv(trimmedRight)
 	}
 
@@ -79,14 +79,14 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	padded32str := string(padded32)
 
 	usedFlag := buf.Refs.usedFlags[padded32str]
-	if buf.Allows(FLAG_MIRROR_FLAG) && usedFlag != 0 {
+	if buf.Allows(FLAG_MIRROR_FLAG_S) && usedFlag != 0 {
 		usedFlag -= 1
 
 		// We can only encode 16 bits for the mirror flag
 		// if it exceeds this value, then we can't mirror it
 		// NOR it can be this pointer itself
 		if usedFlag <= 0xffff && usedFlag != buf.Len() {
-			return []byte{byte(FLAG_MIRROR_FLAG), byte(usedFlag >> 8), byte(usedFlag)}, Mirror, nil
+			return []byte{byte(FLAG_MIRROR_FLAG_S), byte(usedFlag >> 8), byte(usedFlag)}, Mirror, nil
 		}
 	}
 
@@ -94,13 +94,13 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// re-read the storage flag, that would mean writting to the storage twice
 	// apart from that, they work like normal mirror flags
 	usedStorageFlag := buf.Refs.usedStorageFlags[padded32str]
-	if buf.Allows(FLAG_READ_STORE_FLAG) && usedStorageFlag != 0 && usedStorageFlag <= 0xffffff {
+	if buf.Allows(FLAG_READ_STORE_FLAG_S) && usedStorageFlag != 0 && usedStorageFlag <= 0xffffff {
 		usedStorageFlag -= 1
 
 		// We can only encode 16 bits for the mirror flag
 		// if it exceeds this value, then we can't mirror it
 		if usedStorageFlag <= 0xffff {
-			return []byte{byte(FLAG_READ_STORE_FLAG), byte(usedStorageFlag >> 8), byte(usedStorageFlag)}, Mirror, nil
+			return []byte{byte(FLAG_READ_STORE_FLAG_S), byte(usedStorageFlag >> 8), byte(usedStorageFlag)}, Mirror, nil
 		} else {
 			return []byte{byte(FLAG_READ_STORE_FLAG_L), byte(usedStorageFlag >> 16), byte(usedStorageFlag >> 8), byte(usedStorageFlag)}, Mirror, nil
 		}
@@ -113,7 +113,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	}
 
 	// We can do the same for any 2 byte word that is padded right
-	if buf.Allows(FLAG_BYTES32_INV_PADDING) && len(trimmedRight) <= 2 {
+	if buf.Allows(FLAG_READ_WORD_INV) && len(trimmedRight) <= 2 {
 		return buf.EncodeWordBytes32Inv(trimmedRight)
 	}
 
@@ -132,9 +132,9 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// With 3 bytes we can also copy any other word from the calldata
 	// this can be anything but notice: we must copy the value already padded
 	copyIndex := buf.FindPastData(padded32)
-	if buf.Allows(FLAG_COPY_CALLDATA) && copyIndex != -1 && copyIndex <= 0xffffff {
+	if buf.Allows(FLAG_COPY_CALLDATA_S) && copyIndex != -1 && copyIndex <= 0xffffff {
 		if copyIndex <= 0xffff {
-			return []byte{byte(FLAG_COPY_CALLDATA), byte(copyIndex >> 8), byte(copyIndex), byte(0x20)}, Stateless, nil
+			return []byte{byte(FLAG_COPY_CALLDATA_S), byte(copyIndex >> 8), byte(copyIndex), byte(0x20)}, Stateless, nil
 		} else {
 			return []byte{byte(FLAG_COPY_CALLDATA_L), byte(copyIndex >> 16), byte(copyIndex >> 8), byte(copyIndex), byte(0x20)}, Stateless, nil
 		}
@@ -227,7 +227,7 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	// If the right padding is shorter than the left padding, then we can use the
 	// inverse padding flag, this uses an extra byte, so we need to account for that
-	if buf.Allows(FLAG_BYTES32_INV_PADDING) && len(trimmedRight) < len(trimmed)-1 {
+	if buf.Allows(FLAG_READ_WORD_INV) && len(trimmedRight) < len(trimmed)-1 {
 		return buf.EncodeWordBytes32Inv(trimmedRight)
 	}
 
@@ -263,11 +263,11 @@ func (buf *Buffer) EncodeWordBytes32Inv(word []byte) ([]byte, EncodeType, error)
 		return nil, Stateless, fmt.Errorf("word is empty")
 	}
 
-	if !buf.Allows(FLAG_BYTES32_INV_PADDING) {
+	if !buf.Allows(FLAG_READ_WORD_INV) {
 		return nil, Stateless, fmt.Errorf("bytes32 INV encoding is not allowed")
 	}
 
-	encodedWord := []byte{byte(FLAG_BYTES32_INV_PADDING), byte(FLAG_READ_WORD_1 + uint(len(word)) - 1)}
+	encodedWord := []byte{byte(FLAG_READ_WORD_INV), byte(FLAG_READ_WORD_1 + uint(len(word)) - 1)}
 	encodedWord = append(encodedWord, word...)
 	return encodedWord, Stateless, nil
 }
@@ -819,7 +819,7 @@ func (buf *Buffer) WriteSequenceChainedSignature(signature []byte) (EncodeType, 
 		buf.commitByte(byte(totalParts >> 8))
 		buf.commitByte(byte(totalParts))
 	} else {
-		buf.commitUint(FLAG_READ_CHAINED)
+		buf.commitUint(FLAG_READ_CHAINED_S)
 		buf.commitByte(byte(totalParts))
 	}
 
@@ -860,13 +860,13 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// cost: 2 bytes
 	bytesStr := string(bytes)
 	usedFlag := buf.Refs.usedFlags[bytesStr]
-	if buf.Allows(FLAG_MIRROR_FLAG) && usedFlag != 0 {
+	if buf.Allows(FLAG_MIRROR_FLAG_S) && usedFlag != 0 {
 		usedFlag -= 1
 
 		// We can only encode 16 bits for the mirror flag
 		// if it exceeds this value, then we can't mirror it
 		if usedFlag <= 0xffff {
-			buf.commitUint(FLAG_MIRROR_FLAG)
+			buf.commitUint(FLAG_MIRROR_FLAG_S)
 			buf.commitBytes([]byte{byte(usedFlag >> 8), byte(usedFlag)})
 			// end without creating a second pointer
 			// otherwise we will be creating a pointer to a pointer
@@ -878,10 +878,10 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// Another optimization is to copy the bytes from the calldata
 	// cost: 3 bytes
 	copyIndex := buf.FindPastData(bytes)
-	if buf.Allows(FLAG_COPY_CALLDATA) && copyIndex != -1 && copyIndex <= 0xffffff && len(bytes) <= 0xffff {
+	if buf.Allows(FLAG_COPY_CALLDATA_S) && copyIndex != -1 && copyIndex <= 0xffffff && len(bytes) <= 0xffff {
 		if len(bytes) <= 0xff {
 			if copyIndex <= 0xffff {
-				buf.commitUint(FLAG_COPY_CALLDATA)
+				buf.commitUint(FLAG_COPY_CALLDATA_S)
 				buf.commitBytes([]byte{byte(copyIndex >> 8), byte(copyIndex), byte(len(bytes))})
 				buf.end([]byte{}, Stateless)
 				return Mirror, nil

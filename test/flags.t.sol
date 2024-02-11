@@ -49,7 +49,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_READ_WORD")
-      .allowOps("FLAG_BYTES32_INV_PADDING")
+      .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
