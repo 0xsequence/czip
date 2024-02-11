@@ -1,6 +1,8 @@
 CZIP: EVM Calldata Zip
 ======================
 
+![CZIP 😈](./logo.png)
+
 **czip** is a utility for compressing and decompressing EVM calldata. It is designed to be used in L2s to trade off calldata size for computation cost.
 
 The primary component of czip is the `decompressor.huff` contract, which is a Huff contract that inflates the calldata. It works by implementing a simple state machine that, in a single pass, decompresses the input. The operations of the state machine are specifically designed to work with EVM calldata.
@@ -66,6 +68,18 @@ czip-compressor encode_any 0x0000000000000000000000000000000000000000000000012a5
 ### Encode Sequence Transaction
 
 It works similarly to `encode_calls`, but it is specifically designed to compress a Sequence wallet transaction. It expects the data to be a Sequence Transaction ABI-encoded.
+
+## Using storage indexes
+
+By default all commands run with `--use-storage false`, which means that the decompressor won't write any data to the storage, or read any addresses or bytes32 using indexes.
+
+Storage indexes can be enabled using the following flags:
+
+- `--use-storage true` Enables the use of storage indexes.
+- `--contract <address>` An instance of the `decompressor.huff` contract to use for storage indexes.
+- `--provider <provider>` The provider from which to fetch the pointers.
+
+Notice that a cache on `/tmp/czip-indexes-<chain-id>.json` is automatically created to avoid fetching the same pointers multiple times.
 
 ## Decompressor contract
 
