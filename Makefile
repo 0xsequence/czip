@@ -1,11 +1,10 @@
 all:
 	@echo "Usage: make <target>"
 	@echo "  where <target> is one of the following:"
-	@echo "    foundryup"
-	@echo "    foundrydown"
-	@echo "    foundryclean"
-	@echo "    foundryrestart"
-	@echo "    foundrystatus"
+	@echo "    bootstrap"
+	@echo "    forge"
+	@echo "    build"
+	@echo "    test"
 
 bootstrap: check-forge check-huffc forge
 

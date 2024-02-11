@@ -16,7 +16,7 @@ func main() {
 	}
 
 	if len(args.Positional) < 1 {
-		fmt.Println("Usage: encode_sequence_tx / encode_call / encode_calls / encode_any / extras")
+		fmt.Printf("Usage (%s): encode_sequence_tx / encode_call / encode_calls / encode_any / extras\n", compressor.VERSION)
 		os.Exit(1)
 	}
 
