@@ -1,34 +1,65 @@
 name: test
 
-on: workflow_dispatch
+on: [push]
 
 env:
   FOUNDRY_PROFILE: ci
 
 jobs:
-  check:
+  test-fast:
     strategy:
       fail-fast: true
 
-    name: Foundry project
+    name: Fuzz testing (fast)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.18.0'
+
+      - name: Install Huff
+        uses: huff-language/huff-toolchain@v2
+        with:
+          version: nightly
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
-      - name: Run Forge build
+      - name: Run tests (fast)
         run: |
-          forge --version
-          forge build --sizes
-        id: build
+          ./run_tests.sh -vvv
+        id: test
 
-      - name: Run Forge tests
+  test-slow:
+    strategy:
+      fail-fast: true
+
+    name: Fuzz testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.18.0'
+
+      - name: Install Huff
+        uses: huff-language/huff-toolchain@v2
+        with:
+          version: nightly
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run tests
         run: |
-          forge test -vvv
+          ./run_tests.sh -vvv --fuzz-runs 8192
         id: test
