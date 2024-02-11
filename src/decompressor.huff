@@ -1,8 +1,8 @@
-/// @title L2 Compressor
+/// @title L2 Decompressor
 /// @notice SPDX-License-Identifier: MIT
 /// @author Agustin Aguilar <@Agusx1211>
 
-#include "./vm.huff"
+#include "./state_machine.huff"
 
 #define jumptable SELECTORS_TABLE {
   execute_transaction          // 0x00

@@ -23,7 +23,7 @@ contract FlagsTestNoGo is Test {
   address public compressor;
 
   function setUp() public {
-    compressor = HuffDeployer.deploy("compressor");
+    compressor = HuffDeployer.deploy("decompressor");
   }
 
   function decode(bytes memory _data) internal returns (bytes memory) {
