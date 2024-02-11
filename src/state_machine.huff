@@ -111,7 +111,7 @@
   FLAG_READ_WORD_30         // 0x1e
   FLAG_READ_WORD_31         // 0x1f
   FLAG_READ_WORD_32         // 0x20
-  FLAG_READ_WORD            // 0x21
+  FLAG_READ_WORD_INV        // 0x21
   FLAG_READ_N_BYTES         // 0x22
   FLAG_WRITE_ZEROS          // 0x23
   FLAG_NESTED_N_FLAGS_S     // 0x24
@@ -316,7 +316,7 @@
     READ_FULL_WORD()
     end jump
 
-  FLAG_READ_WORD:
+  FLAG_READ_WORD_INV:
     READ_BYTES32_INV()
     end jump
 
