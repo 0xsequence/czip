@@ -30,7 +30,7 @@ It encodes a single call to a contract, the subcommands are:
 - `call` Generates a payload that, when sent to the `decompressor.huff` contract, will decompress the calldata and perform the call, ignoring the return value.
 - `call-return` Generates a payload that, when sent to the `decompressor.huff` contract, will decompress the calldata and perform the call, returning the return value.
 
-```
+```cmd
 czip-compressor encode_call decode 0xa9059cbb0000000000000000000000008bf74fb902cdad5d2d8ca0d3bbc7bb16894b9c350000000000000
 000000000000000000000000000000000000000000006052340 0xdAC17F958D2ee523a2206206994597C13D831
 ec7
@@ -47,7 +47,7 @@ It encodes multiple calls to contracts, the subcommands are:
 
 Notice that the `call-return` subcommand is not available in this mode.
 
-```
+```cmd
 czip-compressor encode_calls decode 0xa9059cbb0000000000000000000000009813d80d0686406b79c29b2b8a672a13725facb300000000000000000000000000000000000000000000000ae56f730e6d840000 0xdac17f958d2ee523a2206206994597c13d831ec7 0x095ea7b30000000000000000000000007c56be0ad3128acc33190484cd1badebc8c76240ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff 0xdac17f958d2ee523a2206206994597c13d831ec7
 
 > 0x0c023700a9059cbb269813d80d0686406b79c29b2b8a672a13725facb3338fda26dac17f958d2ee523a2206206994597c13d831ec73700095ea7b3267c56be0ad3128acc33190484cd1badebc8c7624031ff2e0020
@@ -59,7 +59,7 @@ czip-compressor encode_calls decode 0xa9059cbb0000000000000000000000009813d80d06
 
 It encodes any data into a compressed representation. Sending the payload to the `decompressor.huff` contract will return the original data.
 
-```
+```cmd
 czip-compressor encode_any 0x0000000000000000000000000000000000000000000000012a5f58168ee60000
 
 > 0x0d3388d7
