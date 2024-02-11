@@ -352,7 +352,7 @@
 
   FLAG_READ_POW_10_MANTISSA:
     __tablestart(POW_10_TABLE)
-    READ_POW_10_MANTISSA(0x05, 0xd8)
+    READ_POW_10_MANTISSA()
     end jump
 
   FLAG_READ_N_BYTES:
@@ -484,6 +484,27 @@
     READ_STORE_FLAG()
     end jump
 
+  FLAG_WRITE_ZEROS:
+    READ_WRITE_ZEROS()
+    end jump
+  
+  FLAG_POW_10:
+    READ_POW_10()
+    end jump
+
+  FLAG_SELF_EXECUTE:
+    READ_SELF_EXECUTE(<nrfs>)
+    end jump
+
+  FLAG_POW_2_MINUS_1:
+    READ_POW2_MINUS_1()
+    end jump
+
+  FLAG_MIRROR_FLAG_L:
+  FLAG_COPY_CALLDATA_L:
+  FLAG_COPY_CALLDATA_XL:
+  FLAG_BYTES32_INV_PADDING:
+
   default:
     // The default just pushes the flag as a byte (padded to 32 bytes)
     [HIGHEST_FLAG_PLUS_ONE] // [HIGHEST_FLAG_PLUS_ONE, flag, windex, rindex, jump_to]
@@ -539,63 +560,17 @@
   // input stack: [windex, rindex]
 }
 
-#define macro READ_POW_10_AND_SELF_EXECUTE(nrfs) = takes (3) returns (2) {
+#define macro READ_POW_10() = takes (3) returns (2) {
   // input stack: [table_start, windex, rindex]
 
-  swap2          // [rindex, windex, table_start]
-  LOAD_1_BYTE()  // [exp_word, rindex, windex, table_start]
+  swap2             // [rindex, windex, table_start]
+  LOAD_1_BYTE()     // [exp, rindex, windex, table_start]
 
-  // We didn't had any more pleace for READ_SELF_EXECUTE without expanding
-  // the jumptable! so it has to live here. Sorry about that.
-  // 10 ** 0 * N is more expensive than just reading 1 byte,
-  // so this wasn't useful anyway
+  swap1             // [rindex, exp, windex, table_start]
+  swap3             // [table_start, exp, windex, rindex]
+  swap1             // [exp, table_start, windex, rindex]
 
-  dup1                  // [exp_word, exp_word, rindex, windex, table_start]
-  normal_flow jumpi     // [exp_word, rindex, windex, table_start]
-
-    // --- WARNING UGLY CODE ---
-
-    pop                        // [rindex, windex, table_start]
-    swap2                      // [table_start, windex, rindex]
-    pop                        // [windex, rindex]
-
-    READ_SELF_EXECUTE(<nrfs>)  // [windex, rindex]
-    end_pow_10 jump            // [windex, rindex]
-
-  normal_flow:
-
-  // The first bit determines if we will multiply this by
-  // the next byte or not, this is fine as the maximum value that we
-  // can represent in a word is only 10 ** 77
-  dup1                          // [exp_word, exp_word, rindex, windex, table_start]
-  0x80 and                      // [not_use_mul, exp_word, rindex, windex, table_start]
-  swap1                         // [exp_word, not_use_mul, rindex, windex, table_start]
-  0x7f and                      // [exp, not_use_mul, rindex, windex, table_start]
-
-  swap2                         // [rindex, not_use_mul, exp_word, windex, table_start]
-  swap4                         // [table_start, not_use_mul, exp_word, windex, rindex]
-  swap1                         // [not_use_mul, table_start, exp_word, windex, rindex]
-  swap3                         // [windex, table_start, exp_word, not_use_mul, rindex]
-  swap2                         // [exp_word, table_start, windex, not_use_mul, rindex]
-
-  POW_10()                      // [windex, not_use_mul, rindex]
-
-  swap1                         // [not_use_mul, windex, rindex]
-
-  end_pow_10 jumpi              // [windex, rindex]
-
-    BACKREAD_SINGLE_VALUE()     // [pow_result, windex, rindex]
-    swap2                       // [rindex, windex, pow_result]
-    LOAD_1_BYTE()               // [mantissa, rindex, windex, pow_result]
-    swap1                       // [rindex, mantissa, windex, pow_result]
-    swap3                       // [pow_result, mantissa, windex, rindex]
-    mul                         // [(pow_result * mantissa), windex, rindex]
-    dup2                        // [windex, (pow_result * mantissa), windex, rindex]
-    mstore                      // [windex, rindex]
-    0x20                        // [0x20, windex, rindex]
-    add                         // [(0x20 + windex), rindex]
-
-  end_pow_10:                       // [windex, rindex]
+  POW_10()          // [windex, rindex]
 
   // output stack: [windex, rindex]
 }
@@ -2045,41 +2020,39 @@
 
   LOAD_1_BYTE() // [exp, rindex, windex]
 
-  // an exp value 0 means that the formula will be 2 ** exp - 1
-  // and we need to read a second exponent
+  0x01          // [0x01, exp, rindex, windex]
+  swap1         // [exp, 0x01, rindex, windex]
+  shl           // [(0x01 << exp), rindex, windex]
 
-  dup1              // [exp, exp, rindex, windex]
-  dont_sub_1 jumpi  // [exp, rindex, windex]
+  dup3          // [windex, (0x01 << exp), rindex, windex]
+  swap2         // [rindex, (0x01 << exp), windex, windex]
+  swap3         // [windex, (0x01 << exp), windex, rindex]
 
-  //sub_1:
-    pop             // [rindex, windex]
+  mstore        // [windex, rindex]
+  0x20 add      // [windex + 0x20, rindex]
 
-    LOAD_1_BYTE()   // [exp, rindex, windex]
-    
-    0x01            // [0x01, exp, rindex, windex]
-    dup1            // [0x01, 0x01, exp, rindex, windex]
-    swap2           // [exp, 0x01, 0x01, rindex, windex]
-    dup3            // [0x01, exp, 0x01, 0x01, rindex, windex]
+  // output stack: [windex, rindex]
+}
 
-    add             // [(0x01 + exp), 0x01, 0x01, rindex, windex]
-    shl             // [(0x01 << (0x01 + exp)), 0x01, rindex, windex]
-    sub             // [((0x01 << (0x01 + exp)) - 0x01), rindex, windex]
+#define macro READ_POW2_MINUS_1() = takes(2) returns (2) {
+  // input stack: [windex, rindex]
 
-    end_if jump
+  swap1         // [rindex, windex]
 
-  dont_sub_1:
-    0x01            // [0x01, exp, rindex, windex]
-    swap1           // [exp, 0x01, rindex, windex]
-    shl             // [(0x01 << exp), rindex, windex]
+  LOAD_1_BYTE() // [exp, rindex, windex]
 
-  end_if:
+  0x01          // [0x01, exp, rindex, windex]
+  dup1          // [0x01, 0x01, exp, rindex, windex]
+  swap2         // [exp, 0x01, 0x01, rindex, windex]
+  shl           // [(0x01 << exp), 0x01, rindex, windex]
+  sub           // [((0x01 << exp) - 0x01), rindex, windex]
 
-  dup3              // [windex, (0x01 << exp), rindex, windex]
-  swap2             // [rindex, (0x01 << exp), windex, windex]
-  swap3             // [windex, (0x01 << exp), windex, rindex]
+  dup3          // [windex, (0x01 << exp), rindex, windex]
+  swap2         // [rindex, (0x01 << exp), windex, windex]
+  swap3         // [windex, (0x01 << exp), windex, rindex]
 
-  mstore            // [windex, rindex]
-  0x20 add          // [windex + 0x20, rindex]
+  mstore        // [windex, rindex]
+  0x20 add      // [windex + 0x20, rindex]
 
   // output stack: [windex, rindex]
 }
@@ -2105,7 +2078,7 @@
   // output stack: [windex + size, rindex + size]
 }
 
-#define macro WRITE_ZEROS() = takes (2) returns (2) {
+#define macro READ_WRITE_ZEROS() = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
   dup2         // [rindex, windex, rindex]
