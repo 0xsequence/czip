@@ -39,8 +39,8 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	// If the word is a power of 2 or 10, we can encode it using 1 byte
 	pow2 := isPow2(trimmed)
-	if buf.Allows(FLAG_READ_PO2_2) && pow2 != -1 {
-		return []byte{byte(FLAG_READ_PO2_2), byte(pow2)}, Stateless, nil
+	if buf.Allows(FLAG_POW_2) && pow2 != -1 {
+		return []byte{byte(FLAG_POW_2), byte(pow2)}, Stateless, nil
 	}
 
 	// Pow 10 can be encoded as 10 ** N, this uses 1 byte
@@ -70,8 +70,8 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// We can also use (10 ** N) * X, this uses 2 bytes
 	// it uses 5 bits for the exponent and 11 bits for the mantissa
 	pow10fn, pow10fm := isPow10Mantissa(trimmed, 32, 2048)
-	if buf.Allows(FLAG_READ_POW_10_MANTISSA_S) && pow10fn != -1 && pow10fn != 0 && pow10fm != -1 {
-		return []byte{byte(FLAG_READ_POW_10_MANTISSA_S), byte(pow10fn<<3) | byte(pow10fm>>8), byte(pow10fm)}, Stateless, nil
+	if buf.Allows(FLAG_POW_10_MANTISSA_S) && pow10fn != -1 && pow10fn != 0 && pow10fm != -1 {
+		return []byte{byte(FLAG_POW_10_MANTISSA_S), byte(pow10fn<<3) | byte(pow10fm>>8), byte(pow10fm)}, Stateless, nil
 	}
 
 	// Mirror flag uses 2 bytes, it lets us point to another flag that we had already used before
@@ -119,14 +119,14 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	// With 3 bytes we can encode 10 ** N * X (with a mantissa of 18 bits and an exp of 6 bits)
 	pow10fn, pow10fm = isPow10Mantissa(trimmed, 63, 262143)
-	if buf.Allows(FLAG_READ_POW_10_MANTISSA) && pow10fn != -1 && pow10fn != 0 && pow10fm != -1 {
+	if buf.Allows(FLAG_POW_10_MANTISSA_L) && pow10fn != -1 && pow10fn != 0 && pow10fm != -1 {
 		// The first byte is 6 bits of exp and 2 bits of mantissa
 		b1 := byte(uint64(pow10fn)<<2) | byte(uint64(pow10fm)>>16)
 		// The next 16 bits are the last 16 bits of the mantissa
 		b2 := byte(pow10fm >> 8)
 		b3 := byte(pow10fm)
 
-		return []byte{byte(FLAG_READ_POW_10_MANTISSA), byte(b1), byte(b2), byte(b3)}, Stateless, nil
+		return []byte{byte(FLAG_POW_10_MANTISSA_L), byte(b1), byte(b2), byte(b3)}, Stateless, nil
 	}
 
 	// With 3 bytes we can also copy any other word from the calldata

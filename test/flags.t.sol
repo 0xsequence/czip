@@ -85,7 +85,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_POW_10_MANTISSA_S")
+      .allowOps("FLAG_POW_10_MANTISSA_S")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -98,7 +98,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_POW_10_MANTISSA")
+      .allowOps("FLAG_POW_10_MANTISSA_L")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -110,7 +110,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_PO2_2")
+      .allowOps("FLAG_POW_2")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);

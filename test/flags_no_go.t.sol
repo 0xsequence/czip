@@ -9,10 +9,10 @@ uint8 constant DECODE_ANY             = 0x0d;
 
 uint8 constant FLAG_READ_WORD_1       = 0x01;
 uint8 constant FLAG_READ_WORD_32      = 0x20;
-uint8 constant FLAG_READ_N_BYTES      = 0x2b;
-uint8 constant FLAG_NESTED_N_FLAGS_S  = 0x34;
-uint8 constant FLAG_COPY_CALLDATA     = 0x4e;
-uint8 constant FLAG_MIRROR_FLAG       = 0x4f;
+uint8 constant FLAG_READ_N_BYTES      = 0x22;
+uint8 constant FLAG_NESTED_N_FLAGS_S  = 0x24;
+uint8 constant FLAG_COPY_CALLDATA     = 0x3f;
+uint8 constant FLAG_MIRROR_FLAG       = 0x3d;
 
 contract FlagsTestNoGo is Test {
   using Encoder for Encoder.CommandBuffer;
