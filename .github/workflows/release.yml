@@ -38,12 +38,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          path: 'compressor'
           fetch-depth: 0
       - name: Log into Github registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - name: Docker build
         run: |
-          docker build --build-arg VERSION=${GITHUB_REF##*/} -t ghcr.io/0xsequence/czip-compressor:${GITHUB_REF##*/} -t ghcr.io/0xsequence/czip-compressor:latest .
+          docker build --build-arg VERSION=${GITHUB_REF##*/} -t ghcr.io/0xsequence/czip-compressor:${GITHUB_REF##*/} -t ghcr.io/0xsequence/czip-compressor:latest ./compressor
           docker push ghcr.io/0xsequence/czip-compressor:${GITHUB_REF##*/}
           docker push ghcr.io/0xsequence/czip-compressor:latest
