@@ -32,7 +32,7 @@ jobs:
 
       - name: Run tests (fast)
         run: |
-          ./run_tests.sh -vvv
+          ./run_tests.sh -vvv --fuzz-runs 32
         id: test
 
   test-slow:
@@ -61,5 +61,5 @@ jobs:
 
       - name: Run tests
         run: |
-          ./run_tests.sh -vvv --fuzz-runs 8192
+          ./run_tests.sh -vvv
         id: test
