@@ -59,20 +59,20 @@ contract FlagsTest is Test {
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_POWER_OF_10")
+      .allowOps("FLAG_POW_10")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
   }
 
   function test_pow10Mantissa_S(uint8 _exp, uint8 _mantissa) external {
-    uint256 v = bound(_exp, 1, 62);
-    uint256 m = bound(_mantissa, 1, 255);
+    uint256 v = bound(_exp, 1, 31);
+    uint256 m = bound(_mantissa, 1, 2047);
     uint256 r; unchecked { r = 10**v * m;}
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_POWER_OF_10")
+      .allowOps("FLAG_READ_POW_10_MANTISSA_S")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -109,7 +109,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_POWER_OF_2")
+      .allowOps("FLAG_POW_2_MINUS_1")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);

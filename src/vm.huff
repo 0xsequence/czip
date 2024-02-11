@@ -5,7 +5,7 @@
 #include "./libs/errors.huff"
 
 #define constant ADDR_BYTES_STORAGE = 0x00
-#define constant FMS = 0xa0
+#define constant FMS = 0xb2
 
 #define constant FLAG_READ_BYTES32_2_BYTES = 0x27
 #define constant FLAG_READ_ADDRESS_2_BYTES = 0x23
@@ -169,10 +169,11 @@
   FLAG_COPY_CALLDATA_L       // 0x55
   FLAG_COPY_CALLDATA_XL      // 0x56
   FLAG_BYTES32_INV_PADDING   // 0x57
+  FLAG_READ_STORE_FLAG_L     // 0x58
 }
 
-#define constant HIGHEST_FLAG = 0x57
-#define constant HIGHEST_FLAG_PLUS_ONE = 0x58
+#define constant HIGHEST_FLAG = 0x58
+#define constant HIGHEST_FLAG_PLUS_ONE = 0x59
 
 #define macro READ_FLAG() = takes (2) returns (2) {
   // input stack: [windex, rindex]
@@ -481,7 +482,7 @@
     READ_COPY_CALLDATA(0x02, 0xf0, 0x01, 0xf8)
     end jump
   FLAG_READ_STORE_FLAG:
-    READ_STORE_FLAG()
+    READ_STORE_FLAG(0x02, 0xf0)
     end jump
 
   FLAG_WRITE_ZEROS:
@@ -489,6 +490,7 @@
     end jump
   
   FLAG_POW_10:
+    __tablestart(POW_10_TABLE)
     READ_POW_10()
     end jump
 
@@ -510,6 +512,11 @@
     READ_COPY_CALLDATA(0x03, 0xe8, 0x02, 0xf0)
     end jump
   FLAG_BYTES32_INV_PADDING:
+    READ_BYTES32_INV()
+    end jump
+  FLAG_READ_STORE_FLAG_L:
+    READ_STORE_FLAG(0x03, 0xe8)
+    end jump
 
   default:
     // The default just pushes the flag as a byte (padded to 32 bytes)
@@ -672,11 +679,11 @@
   // output stack: [windex, rindex]
 }
 
-#define macro READ_STORE_FLAG() = takes (2) returns (2) {
+#define macro READ_STORE_FLAG(s_bytes, s_offset) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
-  swap1                         // [rindex, windex]
-  LOAD_DYNAMIC_SIZE(0x02, 0xf0) // [trindex, rindex, windex]
+  swap1                                    // [rindex, windex]
+  LOAD_DYNAMIC_SIZE(<s_bytes>, <s_offset>) // [trindex, rindex, windex]
 
   dup1                          // [trindex, trindex, rindex, windex]
   calldataload                  // [data[trindex], trindex, rindex, windex]
@@ -1934,22 +1941,65 @@
   // output stack: [windex, rindex]
 }
 
+#define macro READ_BYTES32_INV() = takes (2) returns (2) {
+  // input stack: [windex, rindex]
+
+  // The instruction number defines how many bytes we are going to read
+  dup2         // [rindex, windex, rindex]
+  calldataload // [data[rindex], windex, rindex]
+  callvalue    // [0x00, data[rindex], windex, rindex]
+  byte         // [byte[0x00], windex, rindex]
+
+  dup1         // [inst, inst, windex, rindex]
+  
+  0x03         // [0x03, inst, inst, windex, rindex]
+  shl          // [(inst << 0x03), inst, windex, rindex]
+
+  0x100        // [0x100, (inst << 0x03), inst, windex, rindex]
+  sub          // [shift_bits, inst, windex, rindex]
+
+  swap3        // [rindex, inst, windex, shift_bits]
+  0x03         // [0x02, rindex, inst, windex, shift_bits]
+  add          // [rindex, inst, windex, shift_bits]
+
+  dup1         // [rindex, rindex, inst, windex, shift_bits]
+  calldataload // [word, rindex, inst, windex, shift_bits]
+  
+  swap1        // [rindex, word, inst, windex, shift_bits]
+  swap4        // [shift_bits, word, inst, windex, rindex]
+  shr          // [(word >> shift_bits), inst, windex, rindex]
+
+  dup3         // [windex, (word >> shift_bits), inst, windex, rindex]
+  mstore       // [inst, windex, rindex]
+
+  swap1        // [windex, inst, rindex]
+  0x20         // [0x20, windex, inst, rindex]
+  add          // [(0x20 + windex), inst, rindex]
+
+  swap2        // [rindex, inst, (0x20 + windex)]
+  add          // [(rindex + inst), (0x20 + windex)]
+
+  swap1        // [(0x20 + windex), (rindex + inst)]
+
+  // output stack: [0x20 + windex, valB + rindex]
+}
+
 #define macro READ_BYTES32(shift_bits, read_bytes) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
-  0x20           // [0x20, windex, rindex]
+  0x20              // [0x20, windex, rindex]
 
-  dup3           // [rindex, 0x20, windex, rindex]
-  calldataload   // [word, 0x20, windex, rindex]
+  dup3              // [rindex, 0x20, windex, rindex]
+  calldataload      // [word, 0x20, windex, rindex]
 
   // Shift to the right so we only read the first <val> bits
-  <shift_bits> shr      // [word >> <val>, 0x20, windex, rindex]
+  <shift_bits> shr  // [word >> <val>, 0x20, windex, rindex]
 
   // Store on windex
-  dup3           // [windex, word >> <val>, 0x20, windex, rindex]
-  mstore         // [0x20, windex, rindex]
+  dup3              // [windex, word >> <val>, 0x20, windex, rindex]
+  mstore            // [0x20, windex, rindex]
 
-  add            // [windex + 0x20, rindex]
+  add               // [windex + 0x20, rindex]
 
   swap1             // [rindex, windex + 0x20]
   <read_bytes> add  // [rindex + <val>, windex + 0x20]
@@ -2084,6 +2134,10 @@
   swap1         // [rindex, windex]
 
   LOAD_1_BYTE() // [exp, rindex, windex]
+
+  // Always use byte + 1, or else we can't express 2 ** 256 - 1
+  0x01          // [0x01, exp, rindex, windex]
+  add           // [(0x01 + exp), rindex, windex]
 
   0x01          // [0x01, exp, rindex, windex]
   dup1          // [0x01, 0x01, exp, rindex, windex]

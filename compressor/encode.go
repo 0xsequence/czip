@@ -41,17 +41,17 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// Notice that marking the first bit of N as 1 denotes that we are going to do
 	// 10 ** N and not 10 ** N * X, that's why we do `| 0x80`
 	pow10 := isPow10(trimmed)
-	if buf.Allows(FLAG_READ_POWER_OF_10_MISC) && pow10 != -1 && pow10 != 0 && pow10 <= 77 {
-		return []byte{byte(FLAG_READ_POWER_OF_10_MISC), byte(pow10 | 0x80)}, Stateless, nil
+	if buf.Allows(FLAG_POW_10) && pow10 != -1 && pow10 != 0 && pow10 <= 77 {
+		return []byte{byte(FLAG_POW_10), byte(pow10)}, Stateless, nil
 	}
 
 	// 2 ** n - 1 can be represented by two bytes (and the first two are 00)
 	// so it goes next. We do it before word encoding since word encoding won't
 	// have the first 2 bytes as 00, in reality this only applies to 0xffff
 	pow2minus1 := isPow2minus1(trimmed)
-	if buf.Allows(FLAG_READ_POWER_OF_2) && pow2minus1 != -1 {
+	if buf.Allows(FLAG_POW_2_MINUS_1) && pow2minus1 != -1 {
 		// The opcode adds an extra 1 to the value, so we need to subtract 1
-		return []byte{byte(FLAG_READ_POWER_OF_2), 0x00, byte(pow2minus1 - 1)}, Stateless, nil
+		return []byte{byte(FLAG_POW_2_MINUS_1), byte(pow2minus1 - 1)}, Stateless, nil
 	}
 
 	// Now we can store words of 2 bytes, we have exhausted all the 1 byte options
@@ -60,9 +60,10 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	}
 
 	// We can also use (10 ** N) * X, this uses 2 bytes
-	pow10fn, pow10fm := isPow10Mantissa(trimmed, 127, 255)
-	if buf.Allows(FLAG_READ_POWER_OF_10_MISC) && pow10fn != -1 && pow10fn != 0 && pow10fm != -1 {
-		return []byte{byte(FLAG_READ_POWER_OF_10_MISC), byte(pow10fn), byte(pow10fm)}, Stateless, nil
+	// it uses 5 bits for the exponent and 11 bits for the mantissa
+	pow10fn, pow10fm := isPow10Mantissa(trimmed, 32, 2048)
+	if buf.Allows(FLAG_READ_POW_10_MANTISSA_S) && pow10fn != -1 && pow10fn != 0 && pow10fm != -1 {
+		return []byte{byte(FLAG_READ_POW_10_MANTISSA_S), byte(pow10fn<<3) | byte(pow10fm>>8), byte(pow10fm)}, Stateless, nil
 	}
 
 	// Mirror flag uses 2 bytes, it lets us point to another flag that we had already used before
