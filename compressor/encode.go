@@ -284,10 +284,10 @@ func (buf *Buffer) WriteNWords(words []byte) (EncodeType, error) {
 	}
 
 	if count <= 255 {
-		buf.commitUint(FLAG_SEQUENCE_NESTED_N_FLAGS_S)
+		buf.commitUint(FLAG_NESTED_N_FLAGS_S)
 		buf.commitByte(byte(count))
 	} else if count <= 65535 {
-		buf.commitUint(FLAG_SEQUENCE_NESTED_N_FLAGS_L)
+		buf.commitUint(FLAG_NESTED_N_FLAGS_L)
 		buf.commitByte(byte(count >> 8))
 		buf.commitByte(byte(count))
 	} else {
@@ -646,11 +646,11 @@ func (buf *Buffer) WriteSequenceSignatureTree(tree []byte) (EncodeType, error) {
 
 	if totalParts > 1 {
 		if totalParts > 255 {
-			buf.commitUint(FLAG_SEQUENCE_NESTED_N_FLAGS_L)
+			buf.commitUint(FLAG_NESTED_N_FLAGS_L)
 			buf.commitByte(byte(totalParts >> 8))
 			buf.commitByte(byte(totalParts))
 		} else {
-			buf.commitUint(FLAG_SEQUENCE_NESTED_N_FLAGS_S)
+			buf.commitUint(FLAG_NESTED_N_FLAGS_S)
 			buf.commitByte(byte(totalParts))
 		}
 	}

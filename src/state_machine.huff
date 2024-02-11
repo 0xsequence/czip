@@ -78,72 +78,72 @@
 }
 
 #define jumptable__packed FLAG_TABLE {
-  FLAG_NO_OP                // 0x00
-  FLAG_READ_WORD_1          // 0x01
-  FLAG_READ_WORD_2          // 0x02
-  FLAG_READ_WORD_3          // 0x03
-  FLAG_READ_WORD_4          // 0x04
-  FLAG_READ_WORD_5          // 0x05
-  FLAG_READ_WORD_6          // 0x06
-  FLAG_READ_WORD_7          // 0x07
-  FLAG_READ_WORD_8          // 0x08
-  FLAG_READ_WORD_9          // 0x09
-  FLAG_READ_WORD_10         // 0x0a
-  FLAG_READ_WORD_11         // 0x0b
-  FLAG_READ_WORD_12         // 0x0c
-  FLAG_READ_WORD_13         // 0x0d
-  FLAG_READ_WORD_14         // 0x0e
-  FLAG_READ_WORD_15         // 0x0f
-  FLAG_READ_WORD_16         // 0x10
-  FLAG_READ_WORD_17         // 0x11
-  FLAG_READ_WORD_18         // 0x12
-  FLAG_READ_WORD_19         // 0x13
-  FLAG_READ_WORD_20         // 0x14
-  FLAG_READ_WORD_21         // 0x15
-  FLAG_READ_WORD_22         // 0x16
-  FLAG_READ_WORD_23         // 0x17
-  FLAG_READ_WORD_24         // 0x18
-  FLAG_READ_WORD_25         // 0x19
-  FLAG_READ_WORD_26         // 0x1a
-  FLAG_READ_WORD_27         // 0x1b
-  FLAG_READ_WORD_28         // 0x1c
-  FLAG_READ_WORD_29         // 0x1d
-  FLAG_READ_WORD_30         // 0x1e
-  FLAG_READ_WORD_31         // 0x1f
-  FLAG_READ_WORD_32         // 0x20
-  FLAG_READ_WORD_INV        // 0x21
-  FLAG_READ_N_BYTES         // 0x22
-  FLAG_WRITE_ZEROS          // 0x23
-  FLAG_SEQUENCE_NESTED_N_FLAGS_S     // 0x24
-  FLAG_SEQUENCE_NESTED_N_FLAGS_L     // 0x25
-  FLAG_SAVE_ADDRESS         // 0x26
-  FLAG_READ_ADDRESS_2       // 0x27
-  FLAG_READ_ADDRESS_3       // 0x28
-  FLAG_READ_ADDRESS_4       // 0x29
-  FLAG_SAVE_BYTES32         // 0x2a
-  FLAG_READ_BYTES32_2       // 0x2b
-  FLAG_READ_BYTES32_3       // 0x2c
-  FLAG_READ_BYTES32_4       // 0x2d
-  FLAG_READ_STORE_FLAG_S    // 0x2e
-  FLAG_READ_STORE_FLAG_L    // 0x2f
-  FLAG_POW_2                // 0x30
-  FLAG_POW_2_MINUS_1        // 0x31
-  FLAG_POW_10               // 0x32
-  FLAG_POW_10_MANTISSA_S    // 0x33
-  FLAG_POW_10_MANTISSA_L    // 0x34
-  FLAG_ABI_0_PARAM          // 0x35
-  FLAG_ABI_1_PARAM          // 0x36
-  FLAG_ABI_2_PARAMS         // 0x37
-  FLAG_ABI_3_PARAMS         // 0x38
-  FLAG_ABI_4_PARAMS         // 0x39
-  FLAG_ABI_5_PARAMS         // 0x3a
-  FLAG_ABI_6_PARAMS         // 0x3b
-  FLAG_READ_DYNAMIC_ABI     // 0x3c
-  FLAG_MIRROR_FLAG_S        // 0x3d
-  FLAG_MIRROR_FLAG_L        // 0x3e
-  FLAG_COPY_CALLDATA_S      // 0x3f
-  FLAG_COPY_CALLDATA_L      // 0x40
-  FLAG_COPY_CALLDATA_XL     // 0x41
+  FLAG_NO_OP             // 0x00
+  FLAG_READ_WORD_1       // 0x01
+  FLAG_READ_WORD_2       // 0x02
+  FLAG_READ_WORD_3       // 0x03
+  FLAG_READ_WORD_4       // 0x04
+  FLAG_READ_WORD_5       // 0x05
+  FLAG_READ_WORD_6       // 0x06
+  FLAG_READ_WORD_7       // 0x07
+  FLAG_READ_WORD_8       // 0x08
+  FLAG_READ_WORD_9       // 0x09
+  FLAG_READ_WORD_10      // 0x0a
+  FLAG_READ_WORD_11      // 0x0b
+  FLAG_READ_WORD_12      // 0x0c
+  FLAG_READ_WORD_13      // 0x0d
+  FLAG_READ_WORD_14      // 0x0e
+  FLAG_READ_WORD_15      // 0x0f
+  FLAG_READ_WORD_16      // 0x10
+  FLAG_READ_WORD_17      // 0x11
+  FLAG_READ_WORD_18      // 0x12
+  FLAG_READ_WORD_19      // 0x13
+  FLAG_READ_WORD_20      // 0x14
+  FLAG_READ_WORD_21      // 0x15
+  FLAG_READ_WORD_22      // 0x16
+  FLAG_READ_WORD_23      // 0x17
+  FLAG_READ_WORD_24      // 0x18
+  FLAG_READ_WORD_25      // 0x19
+  FLAG_READ_WORD_26      // 0x1a
+  FLAG_READ_WORD_27      // 0x1b
+  FLAG_READ_WORD_28      // 0x1c
+  FLAG_READ_WORD_29      // 0x1d
+  FLAG_READ_WORD_30      // 0x1e
+  FLAG_READ_WORD_31      // 0x1f
+  FLAG_READ_WORD_32      // 0x20
+  FLAG_READ_WORD_INV     // 0x21
+  FLAG_READ_N_BYTES      // 0x22
+  FLAG_WRITE_ZEROS       // 0x23
+  FLAG_NESTED_N_FLAGS_S  // 0x24
+  FLAG_NESTED_N_FLAGS_L  // 0x25
+  FLAG_SAVE_ADDRESS      // 0x26
+  FLAG_READ_ADDRESS_2    // 0x27
+  FLAG_READ_ADDRESS_3    // 0x28
+  FLAG_READ_ADDRESS_4    // 0x29
+  FLAG_SAVE_BYTES32      // 0x2a
+  FLAG_READ_BYTES32_2    // 0x2b
+  FLAG_READ_BYTES32_3    // 0x2c
+  FLAG_READ_BYTES32_4    // 0x2d
+  FLAG_READ_STORE_FLAG_S // 0x2e
+  FLAG_READ_STORE_FLAG_L // 0x2f
+  FLAG_POW_2             // 0x30
+  FLAG_POW_2_MINUS_1     // 0x31
+  FLAG_POW_10            // 0x32
+  FLAG_POW_10_MANTISSA_S // 0x33
+  FLAG_POW_10_MANTISSA_L // 0x34
+  FLAG_ABI_0_PARAM       // 0x35
+  FLAG_ABI_1_PARAM       // 0x36
+  FLAG_ABI_2_PARAMS      // 0x37
+  FLAG_ABI_3_PARAMS      // 0x38
+  FLAG_ABI_4_PARAMS      // 0x39
+  FLAG_ABI_5_PARAMS      // 0x3a
+  FLAG_ABI_6_PARAMS      // 0x3b
+  FLAG_READ_DYNAMIC_ABI  // 0x3c
+  FLAG_MIRROR_FLAG_S     // 0x3d
+  FLAG_MIRROR_FLAG_L     // 0x3e
+  FLAG_COPY_CALLDATA_S   // 0x3f
+  FLAG_COPY_CALLDATA_L   // 0x40
+  FLAG_COPY_CALLDATA_XL  // 0x41
 
   // Sequence specific methods
   FLAG_SEQUENCE_EXECUTE           // 0x42
@@ -174,17 +174,16 @@
 #define constant HIGHEST_FLAG = 0x58
 #define constant HIGHEST_FLAG_PLUS_ONE = 0x59
 
-#define macro READ_FLAG() = takes (2) returns (2) {
+#define macro PERFORM_NESTED_READ_FLAG(nrfs) = takes(0) returns (0) {
   // input stack: [windex, rindex]
 
   swap1        // [rindex, windex]
-  end          // [end, rindex, windex]
-  swap2        // [windex, rindex, end]
+  back         // [back, rindex, windex]
+  swap2        // [windex, rindex, back]
 
-  nrfs:
-  FN_READ_FLAG(nrfs) // [windex, rindex]
+  <nrfs> jump // [windex, rindex]
 
-  end:
+  back:
 }
 
 #define macro FN_READ_FLAG(nrfs) = takes (3) returns (2) {
@@ -194,13 +193,13 @@
   calldataload    // [cdata[rindex], windex, rindex, jump_to]
   callvalue byte  // [flag, windex, rindex, jump_to]
 
-  swap2         // [rindex, windex, flag, jump_to]
-  0x01 add      // [rindex + 1, windex, flag, jump_to]
-  swap2         // [flag, windex, rindex + 1, jump_to]
+  swap2           // [rindex, windex, flag, jump_to]
+  0x01 add        // [rindex + 1, windex, flag, jump_to]
+  swap2           // [flag, windex, rindex + 1, jump_to]
 
-  dup1                        // [flag, flag, windex, rindex + 1, jump_to]
-  [HIGHEST_FLAG] lt           // [HIGHEST_FLAG < flag, flag, windex, rindex + 1, jump_to]
-  default jumpi               // [flag, windex, rindex + 1, jump_to]
+  dup1                // [flag, flag, windex, rindex + 1, jump_to]
+  [HIGHEST_FLAG] lt   // [HIGHEST_FLAG < flag, flag, windex, rindex + 1, jump_to]
+  default jumpi       // [flag, windex, rindex + 1, jump_to]
 
   // Starts to become cheaper to skip the loading
   // after 5 times, most real world cases will have more than
@@ -212,10 +211,10 @@
     codecopy                    // [flag, windex, rindex + 1]
   no_load:
 
-  0x01 shl                    // [flag << 0x01, windex, rindex + 1, jump_to]
-  mload                       // [word, windex, rindex + 1, jump_to]
-  0xf0 shr                    // [word >> 0xf0, windex, rindex + 1, jump_to]
-  jump                        // [windex, rindex + 1, jump_to]
+  0x01 shl        // [flag << 0x01, windex, rindex + 1, jump_to]
+  mload           // [word, windex, rindex + 1, jump_to]
+  0xf0 shr        // [word >> 0xf0, windex, rindex + 1, jump_to]
+  jump            // [windex, rindex + 1, jump_to]
 
   FLAG_NO_OP:
     end jump
@@ -328,10 +327,10 @@
     READ_WRITE_ZEROS()
     end jump
 
-  FLAG_SEQUENCE_NESTED_N_FLAGS_S:
+  FLAG_NESTED_N_FLAGS_S:
     READ_NESTED_N_FLAGS_S(<nrfs>)
     end jump 
-  FLAG_SEQUENCE_NESTED_N_FLAGS_L:
+  FLAG_NESTED_N_FLAGS_L:
     READ_NESTED_N_FLAGS_L(<nrfs>)
     end jump 
 
@@ -534,6 +533,78 @@
   // output stack:          // [windex, rindex]
 }
 
+#define macro READ_WORD(shift_bits, read_bytes) = takes (2) returns (2) {
+  // input stack: [windex, rindex]
+
+  0x20              // [0x20, windex, rindex]
+
+  dup3              // [rindex, 0x20, windex, rindex]
+  calldataload      // [word, 0x20, windex, rindex]
+
+  // Shift to the right so we only read the first <val> bits
+  <shift_bits> shr  // [word >> <val>, 0x20, windex, rindex]
+
+  // Store on windex
+  dup3              // [windex, word >> <val>, 0x20, windex, rindex]
+  mstore            // [0x20, windex, rindex]
+
+  add               // [windex + 0x20, rindex]
+
+  swap1             // [rindex, windex + 0x20]
+  <read_bytes> add  // [rindex + <val>, windex + 0x20]
+  swap1             // [windex + 0x20, rindex + <val>]
+
+  // output stack: [0x20 + windex, valB + rindex]
+}
+
+#define macro READ_FULL_WORD() = takes (3) returns (2) {
+  // input stack: [windex, rindex]
+
+  0x20           // [0x20, windex, rindex]
+  dup1           // [0x20, 0x20, windex, rindex]
+
+  dup4           // [rindex, 0x20, 0x20, windex, rindex]
+  calldataload   // [word, 0x20, 0x20, windex, rindex]
+
+  // Store on windex
+  dup4           // [windex, word >> <val>, 0x20, 0x20, windex, rindex]
+  mstore         // [0x20, 0x20, windex, rindex]
+
+  swap3          // [rindex, 0x20, 0x20, windex]
+  add            // [rindex + 0x20, 0x20, windex]
+  swap2          // [windex, 0x20, rindex + 0x20]
+  add            // [windex + 0x20, rindex + 0x20]
+
+  // output stack: [windex + 0x20, rindex + 0x20]
+}
+
+#define macro READ_BYTES32_INV() = takes (2) returns (2) {
+  // input stack: [windex, rindex]
+
+  // Zero-out 32 bytes of windex first
+  __RIGHTPAD(0x00) // [bytes32(0), windex, rindex]
+  dup2             // [windex, bytes32(0), windex, rindex]
+  mstore           // [windex, rindex]
+
+  // The instruction number defines how many bytes we are going to read
+  swap1            // [rindex, windex]
+  LOAD_1_BYTE()    // [inst, rindex, windex]
+
+  swap1            // [rindex, inst, windex]
+  dup2             // [inst, rindex, inst, windex]
+  dup2             // [rindex, inst, rindex, inst, windex]
+  dup5             // [windex, rindex, inst, rindex, inst, windex]
+  calldatacopy     // [rindex, inst, windex]
+
+  add              // [(rindex + inst), windex]
+
+  swap1            // [windex, (rindex + inst)]
+  0x20             // [0x20, windex, (rindex + inst)]
+  add              // [(0x20 + windex), (rindex + inst)]
+
+  // output stack: [0x20 + windex, valB + rindex]
+}
+
 #define macro READ_POW_10_MANTISSA_S() = takes (3) returns (2) {
   // input stack: [table_start, windex, rindex]
 
@@ -716,18 +787,6 @@
   0x20 add           // [windex + 0x20, rindex]
 
   // output stack: [windex, rindex]
-}
-
-#define macro PERFORM_NESTED_READ_FLAG(nrfs) = takes(0) returns (0) {
-  // input stack: [windex, rindex]
-
-  swap1        // [rindex, windex]
-  back         // [back, rindex, windex]
-  swap2        // [windex, rindex, back]
-
-  <nrfs> jump // [windex, rindex]
-
-  back:
 }
 
 #define macro BACKREAD_SINGLE_VALUE() = takes (1) returns (2) {
@@ -1226,14 +1285,6 @@
   // output stack: [windex, rindex]
 }
 
-#define macro READ_EXECUTE_STANDALONE() = takes (2) returns (2) {
-  skip jump
-  rf:
-  FN_READ_FLAG(rf)
-  skip:
-  READ_EXECUTE(rf)
-}
-
 #define macro READ_EXECUTE(nrfs) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
@@ -1316,14 +1367,6 @@
   // output stack: [windex, rindex]
 }
 
-#define macro READ_NONCE_STANDALONE() = takes (2) returns (2) {
-  skip jump
-  rf:
-  FN_READ_FLAG(rf)
-  skip:
-  READ_NONCE(rf)
-}
-
 #define macro READ_NONCE(nrfs) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
@@ -1354,14 +1397,6 @@
   0x20 add                         // [windex + 0x20, rindex]
 
   // output stack: [windex, rindex]
-}
-
-#define macro READ_TRANSACTIONS_STANDALONE() = takes (2) returns (2) {
-  skip jump
-  rf:
-  FN_READ_FLAG(rf)
-  skip:
-  READ_TRANSACTIONS(rf)
 }
 
 #define macro READ_TRANSACTIONS(nrfs) = takes (2) returns (2) {
@@ -1455,14 +1490,6 @@
   pop                        // [windex, rindex]
 
   // output stack: [windex, rindex]
-}
-
-#define macro READ_TRANSACTION_STANDALONE() = takes (2) returns (2) {
-  skip jump
-  rf:
-  FN_READ_FLAG(rf)
-  skip:
-  READ_TRANSACTION(rf)
 }
 
 #define macro READ_TRANSACTION(nrfs) = takes (2) returns (2) {
@@ -1940,78 +1967,6 @@
   // output stack: [windex, rindex]
 }
 
-#define macro READ_BYTES32_INV() = takes (2) returns (2) {
-  // input stack: [windex, rindex]
-
-  // Zero-out 32 bytes of windex first
-  __RIGHTPAD(0x00) // [bytes32(0), windex, rindex]
-  dup2             // [windex, bytes32(0), windex, rindex]
-  mstore           // [windex, rindex]
-
-  // The instruction number defines how many bytes we are going to read
-  swap1            // [rindex, windex]
-  LOAD_1_BYTE()    // [inst, rindex, windex]
-
-  swap1            // [rindex, inst, windex]
-  dup2             // [inst, rindex, inst, windex]
-  dup2             // [rindex, inst, rindex, inst, windex]
-  dup5             // [windex, rindex, inst, rindex, inst, windex]
-  calldatacopy     // [rindex, inst, windex]
-
-  add              // [(rindex + inst), windex]
-
-  swap1            // [windex, (rindex + inst)]
-  0x20             // [0x20, windex, (rindex + inst)]
-  add              // [(0x20 + windex), (rindex + inst)]
-
-  // output stack: [0x20 + windex, valB + rindex]
-}
-
-#define macro READ_WORD(shift_bits, read_bytes) = takes (2) returns (2) {
-  // input stack: [windex, rindex]
-
-  0x20              // [0x20, windex, rindex]
-
-  dup3              // [rindex, 0x20, windex, rindex]
-  calldataload      // [word, 0x20, windex, rindex]
-
-  // Shift to the right so we only read the first <val> bits
-  <shift_bits> shr  // [word >> <val>, 0x20, windex, rindex]
-
-  // Store on windex
-  dup3              // [windex, word >> <val>, 0x20, windex, rindex]
-  mstore            // [0x20, windex, rindex]
-
-  add               // [windex + 0x20, rindex]
-
-  swap1             // [rindex, windex + 0x20]
-  <read_bytes> add  // [rindex + <val>, windex + 0x20]
-  swap1             // [windex + 0x20, rindex + <val>]
-
-  // output stack: [0x20 + windex, valB + rindex]
-}
-
-#define macro READ_FULL_WORD() = takes (3) returns (2) {
-  // input stack: [windex, rindex]
-
-  0x20           // [0x20, windex, rindex]
-  dup1           // [0x20, 0x20, windex, rindex]
-
-  dup4           // [rindex, 0x20, 0x20, windex, rindex]
-  calldataload   // [word, 0x20, 0x20, windex, rindex]
-
-  // Store on windex
-  dup4           // [windex, word >> <val>, 0x20, 0x20, windex, rindex]
-  mstore         // [0x20, 0x20, windex, rindex]
-
-  swap3          // [rindex, 0x20, 0x20, windex]
-  add            // [rindex + 0x20, 0x20, windex]
-  swap2          // [windex, 0x20, rindex + 0x20]
-  add            // [windex + 0x20, rindex + 0x20]
-
-  // output stack: [windex + 0x20, rindex + 0x20]
-}
-
 #define macro SAVE_ADDRESS() = takes (3) returns (2) {
   // input stack: [windex, rindex]
 
@@ -2063,7 +2018,6 @@
   // output stack: [windex + 32, rindex + 32]
 }
 
-// Reads a stored bytes32 using a 2 to 5 bytes pointer index
 #define macro READ_BYTES32_STORAGE(read_bytes, read_bits_shift) = takes (3) returns (2) {
   READ_STORAGE(BYTES32_SMV, shl, <read_bytes>, <read_bits_shift>)
 }

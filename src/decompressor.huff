@@ -27,19 +27,19 @@
   // all this memory will be reused anyway
   __tablesize(SELECTORS_TABLE)     // [table_size]
   __tablestart(SELECTORS_TABLE)    // [table_start, table_size]
-  0x20                        // [0x20, table_start, table_size]
-  codecopy                    // []
+  0x20                             // [0x20, table_start, table_size]
+  codecopy                         // []
 
-  callvalue                   // [0x00]
-  calldataload                // [data[0x00]]
-  callvalue                   // [0x00, data[0x00]]
-  byte                        // [method]
+  callvalue                      // [0x00]
+  calldataload                   // [data[0x00]]
+  callvalue                      // [0x00, data[0x00]]
+  byte                           // [method]
 
-  0x05                        // [0x05, method]
-  shl                         // [(method << 0x05)]
-  0x20 add                    // [method + 0x20]
-  mload                       // [mload[method]]
-  jump                        // []
+  0x05                           // [0x05, method]
+  shl                            // [(method << 0x05)]
+  0x20 add                       // [method + 0x20]
+  mload                          // [mload[method]]
+  jump                           // []
 
   execute_transaction:
     0x01                         // [rindex]
@@ -64,13 +64,13 @@
     0x20 callvalue return
 
   read_storage_slots:
-    PERFORM_READ_SLOTS()         // [size]
-    callvalue                    // [0x00, size]
+    PERFORM_READ_SLOTS()            // [size]
+    callvalue                       // [0x00, size]
     return
 
   decompress_transaction:
-    PRE_DECODE_ONLY()            // [windex, rindex]
-    DECODE_FULL_EXECUTE(nrfs)    // [windex, rindex]
+    PRE_DECODE_ONLY()               // [windex, rindex]
+    DECODE_FULL_EXECUTE(nrfs)       // [windex, rindex]
     POST_DECODE_ONLY()
 
   decompress_many_transactions:
@@ -79,24 +79,24 @@
     POST_DECODE_ONLY()
 
   execute_call:
-    0x01                         // [rindex]
-    PERFORM_CALL(nrfs)           // [rindex]
+    0x01                       // [rindex]
+    PERFORM_CALL(nrfs)         // [rindex]
     callvalue callvalue return
 
   execute_call_return:
-    0x01                         // [rindex]
-    PERFORM_CALL(nrfs)           // [rindex]
+    0x01                       // [rindex]
+    PERFORM_CALL(nrfs)         // [rindex]
 
-    returndatasize               // [returnDataSize, rindex]
-    callvalue                    // [0, returnDataSize, rindex]
-    callvalue                    // [0, 0, returnDataSize, rindex]
-    returndatacopy               // [rindex]
+    returndatasize             // [returnDataSize, rindex]
+    callvalue                  // [0, returnDataSize, rindex]
+    callvalue                  // [0, 0, returnDataSize, rindex]
+    returndatacopy             // [rindex]
 
     returndatasize callvalue return
 
   execute_many_calls:
-    0x01                         // [rindex]
-    PERFORM_MANY_CALLS(nrfs)     // [rindex, size, i]
+    0x01                       // [rindex]
+    PERFORM_MANY_CALLS(nrfs)   // [rindex, size, i]
     callvalue callvalue return
   
   decode_call:
@@ -146,9 +146,9 @@
 #define macro PERFORM_READ_SLOTS() = takes (0) returns (1) {
   // input stack: []
 
-  0x01          // [0x01]
-  dup1          // [rindex, 0x01]
-  callvalue     // [windex, rindex, 0x01]
+  0x01            // [0x01]
+  dup1            // [rindex, 0x01]
+  callvalue       // [windex, rindex, 0x01]
 
   read_another:
     dup2          // [rindex, windex, rindex]
