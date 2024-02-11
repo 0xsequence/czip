@@ -475,10 +475,10 @@
   FLAG_NO_OP:
     end jump
   FLAG_MIRROR_FLAG:
-    READ_MIRROR_FLAG(<nrfs>)
+    READ_MIRROR_FLAG(<nrfs>, 0x02, 0xf0)
     end jump
   FLAG_COPY_CALLDATA:
-    READ_COPY_CALLDATA()
+    READ_COPY_CALLDATA(0x02, 0xf0, 0x01, 0xf8)
     end jump
   FLAG_READ_STORE_FLAG:
     READ_STORE_FLAG()
@@ -501,8 +501,14 @@
     end jump
 
   FLAG_MIRROR_FLAG_L:
+    READ_MIRROR_FLAG(<nrfs>, 0x03, 0xe8)
+    end jump
   FLAG_COPY_CALLDATA_L:
+    READ_COPY_CALLDATA(0x03, 0xe8, 0x01, 0xf8)
+    end jump
   FLAG_COPY_CALLDATA_XL:
+    READ_COPY_CALLDATA(0x03, 0xe8, 0x02, 0xf0)
+    end jump
   FLAG_BYTES32_INV_PADDING:
 
   default:
@@ -593,13 +599,13 @@
   // output stack: [windex]
 }
 
-#define macro READ_MIRROR_FLAG(nrfs) = takes (2) returns (2) {
+#define macro READ_MIRROR_FLAG(nrfs, s_bytes, s_offset) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
-  swap1                         // [rindex, windex]
-  LOAD_DYNAMIC_SIZE(0x02, 0xf0) // [trindex, rindex, windex]
-  swap1                         // [rindex, trindex, windex]
-  swap2                         // [windex, trindex, rindex]
+  swap1                                    // [rindex, windex]
+  LOAD_DYNAMIC_SIZE(<s_bytes>, <s_offset>) // [trindex, rindex, windex]
+  swap1                                    // [rindex, trindex, windex]
+  swap2                                    // [windex, trindex, rindex]
 
   PERFORM_NESTED_READ_FLAG(<nrfs>) // [windex, trindex, rindex]
   swap1                            // [trindex, windex, rindex]
@@ -608,14 +614,14 @@
   // output stack: [windex, rindex]
 }
 
-#define macro READ_COPY_CALLDATA() = takes (2) returns (2) {
+#define macro READ_COPY_CALLDATA(start_b, start_o, size_b, size_o) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
-  swap1                         // [rindex, windex]
-  LOAD_DYNAMIC_SIZE(0x02, 0xf0) // [location, rindex, windex]
-  swap1                         // [rindex, location, windex]
+  swap1                                    // [rindex, windex]
+  LOAD_DYNAMIC_SIZE(<start_b>, <start_o>)  // [location, rindex, windex]
+  swap1                                    // [rindex, location, windex]
 
-  LOAD_1_BYTE()                 // [size, rindex, location, windex]
+  LOAD_DYNAMIC_SIZE(<size_b>, <size_o>)    // [size, rindex, location, windex]
 
   dup1                          // [size, size, rindex, location, windex]
   swap3                         // [location, size, rindex, size, windex]
