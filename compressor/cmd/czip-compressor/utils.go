@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	encoder "github.com/0xsequence/czip/compressor"
+	"github.com/0xsequence/ethkit/ethrpc"
+	"github.com/0xsequence/ethkit/go-ethereum/common"
 )
 
 type ParsedArgs struct {
@@ -70,7 +72,7 @@ func ParseUseStorage(args *ParsedArgs) bool {
 
 	switch val {
 	case "":
-		return true
+		return false
 	case "true":
 		return true
 	case "false":
@@ -80,6 +82,29 @@ func ParseUseStorage(args *ParsedArgs) bool {
 	fmt.Println("Invalid value for use-storage")
 	os.Exit(1)
 	return false
+}
+
+func ParseProvider(args *ParsedArgs) (*ethrpc.Provider, error) {
+	val := args.Flags["provider"]
+	if val == "" {
+		return nil, nil
+	}
+
+	provider, err := ethrpc.NewProvider(val)
+	if err != nil {
+		return nil, err
+	}
+
+	return provider, nil
+}
+
+func ParseContractAddress(args *ParsedArgs) (common.Address, error) {
+	val := args.Flags["contract"]
+	if val == "" {
+		return common.Address{}, fmt.Errorf("missing contract address")
+	}
+
+	return common.HexToAddress(val), nil
 }
 
 func ParseAllowOpcodes(args *ParsedArgs) *encoder.AllowOpcodes {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -49,14 +50,19 @@ func main() {
 }
 
 func encodeAny(args *ParsedArgs) (string, error) {
-	buf := compressor.NewBuffer(compressor.METHOD_DECODE_ANY, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
+	indexes, err := UseIndexes(context.Background(), args)
+	if err != nil {
+		return "", err
+	}
+
+	buf := compressor.NewBuffer(compressor.METHOD_DECODE_ANY, indexes, ParseAllowOpcodes(args), ParseUseStorage(args))
 
 	if len(args.Positional) < 2 {
 		return "", fmt.Errorf("usage: encode_any <hex>")
 	}
 
 	input := common.FromHex(args.Positional[1])
-	_, err := buf.WriteBytesOptimized(input, true)
+	_, err = buf.WriteBytesOptimized(input, true)
 	if err != nil {
 		return "", err
 	}
@@ -95,8 +101,13 @@ func encodeCalls(args *ParsedArgs) (string, error) {
 		addrs[i/2-1] = common.HexToAddress(args.Positional[i+1]).Bytes()
 	}
 
-	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
-	_, err := buf.WriteCalls(addrs, datas)
+	indexes, err := UseIndexes(context.Background(), args)
+	if err != nil {
+		return "", err
+	}
+
+	buf := compressor.NewBuffer(method, indexes, ParseAllowOpcodes(args), ParseUseStorage(args))
+	_, err = buf.WriteCalls(addrs, datas)
 	if err != nil {
 		return "", err
 	}
@@ -119,7 +130,12 @@ func encodeCall(args *ParsedArgs) (string, error) {
 		method = compressor.METHOD_EXECUTE_CALL_RETURN
 	}
 
-	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
+	indexes, err := UseIndexes(context.Background(), args)
+	if err != nil {
+		return "", err
+	}
+
+	buf := compressor.NewBuffer(method, indexes, ParseAllowOpcodes(args), ParseUseStorage(args))
 	_, err = buf.WriteCall(addr, data)
 	if err != nil {
 		return "", err
@@ -148,7 +164,12 @@ func encodeSequenceTx(args *ParsedArgs) (string, error) {
 		return "", fmt.Errorf("unsupported action: %s", action)
 	}
 
-	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
+	indexes, err := UseIndexes(context.Background(), args)
+	if err != nil {
+		return "", err
+	}
+
+	buf := compressor.NewBuffer(method, indexes, ParseAllowOpcodes(args), ParseUseStorage(args))
 	_, err = buf.WriteSequenceExecute(addr, &sequence.Transaction{
 		Nonce:        nonce,
 		Transactions: txs,
