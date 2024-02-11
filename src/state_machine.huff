@@ -1,6 +1,6 @@
 /// @title L2 Compressor state machine
-/// @notice SPDX-License-Identifier: MIT
-/// @author Agustin Aguilar <@Agusx1211>
+/// @notice SPDX-License-Identifier: Apache 2.0
+/// @author Agustin Aguilar <@Agusx1211> - Horizon Blockchain Games Inc.
 
 #include "./libs/errors.huff"
 
