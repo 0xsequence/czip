@@ -38,6 +38,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          path: 'compressor'
           sparse-checkout: 'compressor'
           sparse-checkout-cone-mode: false
           fetch-depth: 0
