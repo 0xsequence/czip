@@ -73,7 +73,7 @@ const (
 	FLAG_READ_BYTES32_4
 	FLAG_READ_POW_10_MANTISSA
 	FLAG_READ_N_BYTES
-	FLAG_READ_POWER_OF_2
+	FLAG_READ_PO2_2
 	FLAG_ABI_0_PARAM
 	FLAG_ABI_1_PARAM
 	FLAG_ABI_2_PARAMS
@@ -213,8 +213,8 @@ func FlagNames() map[string]uint {
 			names["FLAG_READ_POW_10_MANTISSA"] = i
 		case FLAG_READ_N_BYTES:
 			names["FLAG_READ_N_BYTES"] = i
-		case FLAG_READ_POWER_OF_2:
-			names["FLAG_READ_POWER_OF_2"] = i
+		case FLAG_READ_PO2_2:
+			names["FLAG_READ_PO2_2"] = i
 		case FLAG_ABI_0_PARAM:
 			names["FLAG_ABI_0_PARAM"] = i
 		case FLAG_ABI_1_PARAM:

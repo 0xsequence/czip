@@ -110,7 +110,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_READ_POWER_OF_2")
+      .allowOps("FLAG_READ_PO2_2")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);

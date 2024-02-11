@@ -39,8 +39,8 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	// If the word is a power of 2 or 10, we can encode it using 1 byte
 	pow2 := isPow2(trimmed)
-	if buf.Allows(FLAG_READ_POWER_OF_2) && pow2 != -1 {
-		return []byte{byte(FLAG_READ_POWER_OF_2), byte(pow2)}, Stateless, nil
+	if buf.Allows(FLAG_READ_PO2_2) && pow2 != -1 {
+		return []byte{byte(FLAG_READ_PO2_2), byte(pow2)}, Stateless, nil
 	}
 
 	// Pow 10 can be encoded as 10 ** N, this uses 1 byte
