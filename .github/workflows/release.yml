@@ -1,9 +1,14 @@
 name: Release tag
 
+# on:
+#   push:
+#     tags:
+#       - "v*"
+
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - '*'
 
 jobs:
   goreleaser:
