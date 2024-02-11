@@ -195,6 +195,12 @@ The first literal flag is `0x59`, which is the literal `0x00`. The next literal 
 
 All operations that accept an array of operations **MUST** be used with non-zero arrays, as the decompressor will not handle zero-length arrays correctly. If you need to write a zero-length array, use the `NO_OP` operation.
 
+#### Function selectors
+
+The `decompressor.huff` contract contains a pre-defined set of function selectors, this list has been generated from common selectors used in the Ethereum network. It should account for ~90% of the cases.
+
+If a selector is not in the list, it can be provided as a literal value by prefixing it with `00`, all operations that use selectors accept both indexed and literal values.
+
 #### Sequence Execute
 
 The Sequence Execute operation is the same one used by the Sequence call and decode top level functions, it encodes a Sequence transaction to the buffer, ABI encoded.
