@@ -2162,14 +2162,14 @@
   // input stack: [windex, rindex]
 
   dup2         // [rindex, windex, rindex]
-  mload        // [mload[rindex], windex, rindex]
+  calldataload // [mload[rindex], windex, rindex]
   callvalue    // [0x00, mload[rindex], windex, rindex]
   byte         // [size, windex, rindex]
 
   dup1         // [size, size, windex, rindex]
 
   codesize     // [end_code, size, size, windex, rindex]
-  dup3         // [windex, end_code, size, size, windex, rindex]
+  dup4         // [windex, end_code, size, size, windex, rindex]
   codecopy     // [size, windex, rindex]
 
   add          // [(size + windex), rindex]

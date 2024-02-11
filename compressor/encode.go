@@ -856,6 +856,14 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 		return buf.WriteWord(bytes, saveWord)
 	}
 
+	// If all zeros it can be represented using the write-zeros flag
+	if buf.Allows(FLAG_WRITE_ZEROS) && len(bytes) <= 255 && bytesAreZero(bytes) {
+		buf.commitUint(FLAG_WRITE_ZEROS)
+		buf.commitByte(byte(len(bytes)))
+		buf.end(bytes, Stateless)
+		return Stateless, nil
+	}
+
 	// Now we can try to find a mirror flag for the bytes
 	// cost: 2 bytes
 	bytesStr := string(bytes)

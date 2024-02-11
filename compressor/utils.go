@@ -186,3 +186,12 @@ func maxPriority(a EncodeType, b EncodeType) EncodeType {
 
 	return Stateless
 }
+
+func bytesAreZero(b []byte) bool {
+	for _, byteVal := range b {
+		if byteVal != 0 {
+			return false
+		}
+	}
+	return true
+}

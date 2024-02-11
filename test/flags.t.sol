@@ -283,6 +283,20 @@ contract FlagsTest is Test {
     assertEq(data, decoded);
   }
 
+  function test_writeZeros(
+    uint8 _size
+  ) external {
+    bytes memory input = new bytes(_size);
+    bytes memory data = abi.encodePacked(input);
+    bytes memory encoded = vm.encodeAny(data)
+      .useStorage(false)
+      .allowOps("FLAG_WRITE_ZEROS")
+      .allowOps("LITERAL_ZERO")
+      .run();
+    bytes memory decoded = decode(encoded);
+    assertEq(data, decoded);
+  }
+
   function test_sequenceAddress(uint8 _weight, address _addr) external {
     bytes memory data = abi.encodePacked(uint8(0x01), _weight, _addr);
     bytes memory encoded = vm.encodeAny(data)
