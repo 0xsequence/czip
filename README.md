@@ -81,6 +81,18 @@ Storage indexes can be enabled using the following flags:
 
 Notice that a cache on `/tmp/czip-indexes-<chain-id>.json` is automatically created to avoid fetching the same pointers multiple times.
 
+### Example
+
+```cmd
+./compressor/bin/czip-compressor encode_call 0x963752cac40E583Dea143D6262e24f89c9E1F911 call 0xa9059cbb000000000000000000000000963752cac40e583dea143d6262e24f89c9e1f91100000000000000000000000000000000000000000000000000000000000003fc 0x750ba8b76187092B0D1E87E28daaf484d1b5273b
+
+> 0x08370114963752cac40e583dea143d6262e24f89c9e1f9110203fc14750ba8b76187092b0d1e87e28daaf484d1b5273b
+
+./compressor/bin/czip-compressor encode_call --provider https://nodes.sequence.app/arbitrum-nova --contract 0x963752cac40E583Dea143D6262e24f89c9E1F911 call 0xa9059cbb000000000000000000000000963752cac40e583dea143d6262e24f89c9e1f91100000000000000000000000000000000000000000000000000000000000003fc 0x750ba8b76187092B0D1E87E28daaf484d1b5273b --use-storage true
+
+> 0x0837012700020203fc270003
+```
+
 ## Decompressor contract
 
 The `decompressor.huff` serves as the decompressor for all data. It has been carefully designed to be as efficient as possible. It also serves the role of a "repository"; it can store `address` and `bytes32` values that can later be referenced using a pointer.
