@@ -1,0 +1,48 @@
+name: Release tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# on:
+#   push:
+#     branches:
+#       - "**"
+
+jobs:
+  # goreleaser:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v3
+  #       with:
+  #         go-version: 1.22
+  #     - name: Run GoReleaser
+  #       uses: goreleaser/goreleaser-action@v3
+  #       with:
+  #         distribution: goreleaser
+  #         version: latest
+  #         args: release -f .github/.goreleaser.yml --clean
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Log into Github registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Docker build
+        run: |
+          docker build --build-arg VERSION=${GITHUB_REF##*/} -t ghcr.io/0xsequence/czip-compressor:${GITHUB_REF##*/} -t ghcr.io/0xsequence/czip-compressor:latest ./compressor
+          docker push ghcr.io/0xsequence/czip-compressor:${GITHUB_REF##*/}
+          docker push ghcr.io/0xsequence/czip-compressor:latest
