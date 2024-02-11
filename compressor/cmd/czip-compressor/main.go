@@ -81,8 +81,10 @@ func encodeCalls(args *ParsedArgs) (string, error) {
 	var method uint
 	if action == "decode" {
 		method = compressor.METHOD_DECODE_N_CALLS
-	} else {
+	} else if action == "call" {
 		method = compressor.METHOD_EXECUTE_N_CALLS
+	} else {
+		return "", fmt.Errorf("unsupported action: %s", action)
 	}
 
 	datas := make([][]byte, (len(args.Positional)-2)/2)
@@ -111,8 +113,10 @@ func encodeCall(args *ParsedArgs) (string, error) {
 	var method uint
 	if action == "decode" {
 		method = compressor.METHOD_DECODE_CALL
-	} else {
+	} else if action == "call" {
 		method = compressor.METHOD_EXECUTE_CALL
+	} else {
+		method = compressor.METHOD_EXECUTE_CALL_RETURN
 	}
 
 	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
@@ -138,8 +142,10 @@ func encodeSequenceTx(args *ParsedArgs) (string, error) {
 	var method uint
 	if action == "decode" {
 		method = compressor.METHOD_DECODE_SEQUENCE_TX
-	} else {
+	} else if action == "call" {
 		method = compressor.METHOD_EXECUTE_SEQUENCE_TX
+	} else {
+		return "", fmt.Errorf("unsupported action: %s", action)
 	}
 
 	buf := compressor.NewBuffer(method, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
@@ -158,11 +164,11 @@ func encodeSequenceTx(args *ParsedArgs) (string, error) {
 
 func ParseCommonArgs(args *ParsedArgs) (string, []byte, []byte, error) {
 	if len(args.Positional) < 4 {
-		return "", nil, nil, fmt.Errorf("usage: <decode/call> <data> <addr>")
+		return "", nil, nil, fmt.Errorf("usage: <decode/call/call-return> <data> <addr>")
 	}
 
 	action := args.Positional[1]
-	if action != "decode" && action != "call" {
+	if action != "decode" && action != "call" && action != "call-return" {
 		return "", nil, nil, fmt.Errorf("invalid action: %s", action)
 	}
 

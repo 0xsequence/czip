@@ -9,7 +9,7 @@ contract FlagsTest is Test {
   using Encoder for Encoder.CommandBuffer;
   using Encoder for Vm;
 
-  uint256 MAX_LITERAL = type(uint8).max - (0x4f + 1);
+  uint256 MAX_LITERAL = type(uint8).max - (88 + 1);
 
   address public compressor;
 
@@ -37,6 +37,19 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_READ_BYTES32")
+      .run();
+    bytes memory decoded = decode(encoded);
+    assertEq(data, decoded);
+  }
+
+  function test_bytes32_inv(bytes32 _word) external {
+    vm.assume(_word != bytes32(0));
+
+    bytes memory data = abi.encode(_word);
+    bytes memory encoded = vm.encodeAny(data)
+      .useStorage(false)
+      .allowOps("FLAG_READ_BYTES32")
+      .allowOps("FLAG_BYTES32_INV_PADDING")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -386,7 +399,7 @@ contract FlagsTest is Test {
     bytes data;
   }
 
-  function test_sequenceExecute_decode(address _wallet, SequenceTransaction[] memory _txs, uint256 _nonce, bytes memory _signature) external {
+  function test_sequenceExecute_decode(address _wallet, SequenceTransaction[] calldata _txs, uint256 _nonce, bytes memory _signature) external {
     vm.assume(_txs.length > 0 && _txs.length <= 100);
 
     bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
@@ -398,9 +411,10 @@ contract FlagsTest is Test {
     assertEq(abi.encodePacked(data, abi.encode(_wallet)), decoded);
   }
 
-  function test_sequenceExecute_call(address _wallet, SequenceTransaction[] memory _txs, uint256 _nonce, bytes memory _signature) external {
+  function test_sequenceExecute_call(address _wallet, SequenceTransaction[] calldata _txs, uint256 _nonce, bytes memory _signature) external {
     vm.assume(_txs.length > 0 && _txs.length <= 100);
     vm.assume(_wallet != address(this) && _wallet != compressor);
+    vm.assume(_wallet != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
     bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
     bytes memory encoded = vm.encodeSequenceTx("call", _wallet, data)
@@ -413,7 +427,7 @@ contract FlagsTest is Test {
     assertEq(decoded.length, 0);
   }
 
-  function test_call_decode(address _to, bytes memory _data) external {
+  function test_call_decode(address _to, bytes calldata _data) external {
     bytes memory encoded = vm.encodeCall("decode", _to, _data)
       .useStorage(false)
       .run();
@@ -422,7 +436,9 @@ contract FlagsTest is Test {
     assertEq(abi.encodePacked(_data, abi.encode(_to)), decoded);
   }
 
-  function test_call_call(address _to, bytes memory _data) external {
+  function test_call_call(address _to, bytes calldata _data) external {
+    vm.assume(_to != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+
     bytes memory encoded = vm.encodeCall("call", _to, _data)
       .useStorage(false)
       .run();
@@ -447,6 +463,20 @@ contract FlagsTest is Test {
 
     bytes memory decoded = decode(encoded);
     assertEq(expected, decoded);
+  }
+
+  function test_call_and_return(address _to, bytes calldata _data, bytes calldata _return) external {
+    vm.assume(_to != address(this) && _to != compressor);
+    vm.assume(_to != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+
+    bytes memory encoded = vm.encodeCall("call-return", _to, _data)
+      .useStorage(false)
+      .run();
+
+    vm.mockCall(_to, 0, _data, _return);
+
+    bytes memory res = decode(encoded);
+    assertEq(res, _return);
   }
 
   function test_calls_call(Encoder.Call[] memory _calls) external {

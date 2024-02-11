@@ -16,6 +16,11 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	trimmed := bytes.TrimLeft(word, "\x00")
 
+	// Trimmed right must be computed with the word (left padded) to 32 bytes
+	padded32 := make([]byte, 32)
+	copy(padded32[32-len(word):], word)
+	trimmedRight := bytes.TrimRight(padded32, "\x00")
+
 	// If empty then it can be encoded as literal zero
 	if buf.Allows(LITERAL_ZERO) && len(trimmed) == 0 {
 		return []byte{byte(LITERAL_ZERO)}, Stateless, nil
@@ -38,16 +43,14 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 		return []byte{byte(FLAG_READ_POWER_OF_2), byte(pow2)}, Stateless, nil
 	}
 
-	// Notice that marking the first bit of N as 1 denotes that we are going to do
-	// 10 ** N and not 10 ** N * X, that's why we do `| 0x80`
+	// Pow 10 can be encoded as 10 ** N, this uses 1 byte
 	pow10 := isPow10(trimmed)
 	if buf.Allows(FLAG_POW_10) && pow10 != -1 && pow10 != 0 && pow10 <= 77 {
 		return []byte{byte(FLAG_POW_10), byte(pow10)}, Stateless, nil
 	}
 
-	// 2 ** n - 1 can be represented by two bytes (and the first two are 00)
-	// so it goes next. We do it before word encoding since word encoding won't
-	// have the first 2 bytes as 00, in reality this only applies to 0xffff
+	// 2 ** n - 1 can be represented by 1 byte
+	// we need to subtract 1 from the value, or else we can't represent 2 ** 256 - 1
 	pow2minus1 := isPow2minus1(trimmed)
 	if buf.Allows(FLAG_POW_2_MINUS_1) && pow2minus1 != -1 {
 		// The opcode adds an extra 1 to the value, so we need to subtract 1
@@ -59,6 +62,11 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 		return buf.EncodeWordBytes32(trimmed)
 	}
 
+	// Trimmed right inv uses 1 extra byte (so 2 bytes overhead)
+	if buf.Allows(FLAG_BYTES32_INV_PADDING) && len(trimmedRight) == 1 {
+		return buf.EncodeWordBytes32Inv(trimmedRight)
+	}
+
 	// We can also use (10 ** N) * X, this uses 2 bytes
 	// it uses 5 bits for the exponent and 11 bits for the mantissa
 	pow10fn, pow10fm := isPow10Mantissa(trimmed, 32, 2048)
@@ -68,8 +76,6 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 
 	// Mirror flag uses 2 bytes, it lets us point to another flag that we had already used before
 	// but we need to find a flag that mirrors the data with the padding included!
-	padded32 := make([]byte, 32)
-	copy(padded32[32-len(trimmed):], trimmed)
 	padded32str := string(padded32)
 
 	usedFlag := buf.Refs.usedFlags[padded32str]
@@ -88,13 +94,15 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// re-read the storage flag, that would mean writting to the storage twice
 	// apart from that, they work like normal mirror flags
 	usedStorageFlag := buf.Refs.usedStorageFlags[padded32str]
-	if buf.Allows(FLAG_READ_STORE_FLAG) && usedStorageFlag != 0 {
+	if buf.Allows(FLAG_READ_STORE_FLAG) && usedStorageFlag != 0 && usedStorageFlag <= 0xffffff {
 		usedStorageFlag -= 1
 
 		// We can only encode 16 bits for the mirror flag
 		// if it exceeds this value, then we can't mirror it
 		if usedStorageFlag <= 0xffff {
 			return []byte{byte(FLAG_READ_STORE_FLAG), byte(usedStorageFlag >> 8), byte(usedStorageFlag)}, Mirror, nil
+		} else {
+			return []byte{byte(FLAG_READ_STORE_FLAG_L), byte(usedStorageFlag >> 16), byte(usedStorageFlag >> 8), byte(usedStorageFlag)}, Mirror, nil
 		}
 	}
 
@@ -102,6 +110,11 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// methods use more than 3 bytes
 	if buf.Allows(FLAG_READ_BYTES32_1_BYTES) && len(trimmed) <= 3 {
 		return buf.EncodeWordBytes32(trimmed)
+	}
+
+	// We can do the same for any 2 byte word that is padded right
+	if buf.Allows(FLAG_BYTES32_INV_PADDING) && len(trimmedRight) <= 2 {
+		return buf.EncodeWordBytes32Inv(trimmedRight)
 	}
 
 	// With 3 bytes we can encode 10 ** N * X (with a mantissa of 18 bits and an exp of 6 bits)
@@ -119,8 +132,12 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 	// With 3 bytes we can also copy any other word from the calldata
 	// this can be anything but notice: we must copy the value already padded
 	copyIndex := buf.FindPastData(padded32)
-	if buf.Allows(FLAG_COPY_CALLDATA) && copyIndex != -1 && copyIndex <= 0xffff {
-		return []byte{byte(FLAG_COPY_CALLDATA), byte(copyIndex >> 8), byte(copyIndex), byte(0x20)}, Stateless, nil
+	if buf.Allows(FLAG_COPY_CALLDATA) && copyIndex != -1 && copyIndex <= 0xffffff {
+		if copyIndex <= 0xffff {
+			return []byte{byte(FLAG_COPY_CALLDATA), byte(copyIndex >> 8), byte(copyIndex), byte(0x20)}, Stateless, nil
+		} else {
+			return []byte{byte(FLAG_COPY_CALLDATA_L), byte(copyIndex >> 16), byte(copyIndex >> 8), byte(copyIndex), byte(0x20)}, Stateless, nil
+		}
 	}
 
 	// Contract storage is only enabled on some networks
@@ -208,6 +225,12 @@ func (buf *Buffer) EncodeWordOptimized(word []byte, saveWord bool) ([]byte, Enco
 		}
 	}
 
+	// If the right padding is shorter than the left padding, then we can use the
+	// inverse padding flag, this uses an extra byte, so we need to account for that
+	if buf.Allows(FLAG_BYTES32_INV_PADDING) && len(trimmedRight) < len(trimmed)-1 {
+		return buf.EncodeWordBytes32Inv(trimmedRight)
+	}
+
 	// We are out of options now, we need to encode the word as-is
 	return buf.EncodeWordBytes32(trimmed)
 }
@@ -227,6 +250,24 @@ func (buf *Buffer) EncodeWordBytes32(word []byte) ([]byte, EncodeType, error) {
 	}
 
 	encodedWord := []byte{byte(FLAG_READ_BYTES32_1_BYTES + uint(len(word)) - 1)}
+	encodedWord = append(encodedWord, word...)
+	return encodedWord, Stateless, nil
+}
+
+func (buf *Buffer) EncodeWordBytes32Inv(word []byte) ([]byte, EncodeType, error) {
+	if len(word) > 32 {
+		return nil, Stateless, fmt.Errorf("word exceeds 32 bytes")
+	}
+
+	if len(word) == 0 {
+		return nil, Stateless, fmt.Errorf("word is empty")
+	}
+
+	if !buf.Allows(FLAG_BYTES32_INV_PADDING) {
+		return nil, Stateless, fmt.Errorf("bytes32 INV encoding is not allowed")
+	}
+
+	encodedWord := []byte{byte(FLAG_BYTES32_INV_PADDING), byte(FLAG_READ_BYTES32_1_BYTES + uint(len(word)) - 1)}
 	encodedWord = append(encodedWord, word...)
 	return encodedWord, Stateless, nil
 }
@@ -837,13 +878,26 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 	// Another optimization is to copy the bytes from the calldata
 	// cost: 3 bytes
 	copyIndex := buf.FindPastData(bytes)
-	if buf.Allows(FLAG_COPY_CALLDATA) && copyIndex != -1 && copyIndex <= 0xffff {
-		buf.commitUint(FLAG_COPY_CALLDATA)
-		buf.commitBytes([]byte{byte(copyIndex >> 8), byte(copyIndex), byte(len(bytes))})
-		// end without creating a second pointer
-		// data can be copied from the calldata directly
-		buf.end([]byte{}, Stateless)
-		return Mirror, nil
+	if buf.Allows(FLAG_COPY_CALLDATA) && copyIndex != -1 && copyIndex <= 0xffffff && len(bytes) <= 0xffff {
+		if len(bytes) <= 0xff {
+			if copyIndex <= 0xffff {
+				buf.commitUint(FLAG_COPY_CALLDATA)
+				buf.commitBytes([]byte{byte(copyIndex >> 8), byte(copyIndex), byte(len(bytes))})
+				buf.end([]byte{}, Stateless)
+				return Mirror, nil
+			} else {
+				buf.commitUint(FLAG_COPY_CALLDATA_L)
+				buf.commitBytes([]byte{byte(copyIndex >> 16), byte(copyIndex >> 8), byte(copyIndex), byte(len(bytes))})
+				buf.end([]byte{}, Stateless)
+				return Mirror, nil
+			}
+		} else {
+			buf.commitUint(FLAG_COPY_CALLDATA_XL)
+			buf.commitBytes([]byte{byte(copyIndex >> 16), byte(copyIndex >> 8), byte(copyIndex)})
+			buf.commitBytes([]byte{byte(uint(len(bytes)) >> 8), byte(uint(len(bytes)))})
+			buf.end([]byte{}, Stateless)
+			return Mirror, nil
+		}
 	}
 
 	// If the bytes are 33 bytes long, and the first byte is 0x03 it can be represented as a "node"

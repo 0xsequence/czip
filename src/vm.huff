@@ -1944,42 +1944,26 @@
 #define macro READ_BYTES32_INV() = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
+  // Zero-out 32 bytes of windex first
+  __RIGHTPAD(0x00) // [bytes32(0), windex, rindex]
+  dup2             // [windex, bytes32(0), windex, rindex]
+  mstore           // [windex, rindex]
+
   // The instruction number defines how many bytes we are going to read
-  dup2         // [rindex, windex, rindex]
-  calldataload // [data[rindex], windex, rindex]
-  callvalue    // [0x00, data[rindex], windex, rindex]
-  byte         // [byte[0x00], windex, rindex]
+  swap1            // [rindex, windex]
+  LOAD_1_BYTE()    // [inst, rindex, windex]
 
-  dup1         // [inst, inst, windex, rindex]
-  
-  0x03         // [0x03, inst, inst, windex, rindex]
-  shl          // [(inst << 0x03), inst, windex, rindex]
+  swap1            // [rindex, inst, windex]
+  dup2             // [inst, rindex, inst, windex]
+  dup2             // [rindex, inst, rindex, inst, windex]
+  dup5             // [windex, rindex, inst, rindex, inst, windex]
+  calldatacopy     // [rindex, inst, windex]
 
-  0x100        // [0x100, (inst << 0x03), inst, windex, rindex]
-  sub          // [shift_bits, inst, windex, rindex]
+  add              // [(rindex + inst), windex]
 
-  swap3        // [rindex, inst, windex, shift_bits]
-  0x03         // [0x02, rindex, inst, windex, shift_bits]
-  add          // [rindex, inst, windex, shift_bits]
-
-  dup1         // [rindex, rindex, inst, windex, shift_bits]
-  calldataload // [word, rindex, inst, windex, shift_bits]
-  
-  swap1        // [rindex, word, inst, windex, shift_bits]
-  swap4        // [shift_bits, word, inst, windex, rindex]
-  shr          // [(word >> shift_bits), inst, windex, rindex]
-
-  dup3         // [windex, (word >> shift_bits), inst, windex, rindex]
-  mstore       // [inst, windex, rindex]
-
-  swap1        // [windex, inst, rindex]
-  0x20         // [0x20, windex, inst, rindex]
-  add          // [(0x20 + windex), inst, rindex]
-
-  swap2        // [rindex, inst, (0x20 + windex)]
-  add          // [(rindex + inst), (0x20 + windex)]
-
-  swap1        // [(0x20 + windex), (rindex + inst)]
+  swap1            // [windex, (rindex + inst)]
+  0x20             // [0x20, windex, (rindex + inst)]
+  add              // [(0x20 + windex), (rindex + inst)]
 
   // output stack: [0x20 + windex, valB + rindex]
 }
