@@ -18,7 +18,7 @@ func encodeExtras(args *ParsedArgs) (string, error) {
 	var err error
 
 	switch args.Positional[1] {
-	case "FLAG_NESTED_N_WORDS":
+	case "FLAG_SEQUENCE_NESTED_N_WORDS":
 		buf.WriteNWords(data)
 	case "SEQUENCE_DYNAMIC_SIGNATURE_PART":
 		err = encodeSequenceDynamicSignaturePart(buf, data)

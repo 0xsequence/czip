@@ -274,7 +274,7 @@ contract FlagsTest is Test {
   ) external {
     vm.assume(_words.length > 0);
     bytes memory data = abi.encodePacked(_words);
-    bytes memory encoded = vm.encodeExtra("FLAG_NESTED_N_WORDS", data)
+    bytes memory encoded = vm.encodeExtra("FLAG_SEQUENCE_NESTED_N_WORDS", data)
       .useStorage(false)
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -301,7 +301,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encodePacked(uint8(0x01), _weight, _addr);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_ADDRESS")
+      .allowOps("FLAG_SEQUENCE_ADDRESS")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
@@ -313,7 +313,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encodePacked(uint8(0x00), _weight, _p1, _p2, _p3);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_SIGNATURE")
+      .allowOps("FLAG_SEQUENCE_SIGNATURE")
       .run();
     bytes memory decoded = decode(encoded);
     assertEq(data, decoded);
@@ -323,7 +323,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encodePacked(uint8(0x03), _node);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_NODE")
+      .allowOps("FLAG_SEQUENCE_NODE")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
@@ -335,7 +335,7 @@ contract FlagsTest is Test {
     bytes memory data = abi.encodePacked(uint8(0x05), _subdigest);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
-      .allowOps("FLAG_SUBDIGEST")
+      .allowOps("FLAG_SEQUENCE_SUBDIGEST")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();

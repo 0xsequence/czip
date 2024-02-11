@@ -284,10 +284,10 @@ func (buf *Buffer) WriteNWords(words []byte) (EncodeType, error) {
 	}
 
 	if count <= 255 {
-		buf.commitUint(FLAG_NESTED_N_FLAGS_S)
+		buf.commitUint(FLAG_SEQUENCE_NESTED_N_FLAGS_S)
 		buf.commitByte(byte(count))
 	} else if count <= 65535 {
-		buf.commitUint(FLAG_NESTED_N_FLAGS_L)
+		buf.commitUint(FLAG_SEQUENCE_NESTED_N_FLAGS_L)
 		buf.commitByte(byte(count >> 8))
 		buf.commitByte(byte(count))
 	} else {
@@ -483,7 +483,7 @@ func (buf *Buffer) WriteSequenceTransaction(tx *sequence.Transaction) (EncodeTyp
 		var t EncodeType
 
 		if len(tx.Transactions) > 0 {
-			buf.commitUint(FLAG_READ_EXECUTE)
+			buf.commitUint(FLAG_SEQUENCE_EXECUTE)
 			buf.end([]byte{}, Stateless)
 
 			t, err = buf.WriteSequenceExecute(nil, tx)
@@ -569,13 +569,13 @@ func (buf *Buffer) WriteSequenceSignatureBody(noChain bool, body []byte) (Encode
 	var tflag uint
 
 	if !longThreshold && !noChain {
-		tflag = FLAG_S_SIG
+		tflag = FLAG_SEQUENCE_SIG
 	} else if !longThreshold && noChain {
-		tflag = FLAG_S_SIG_NO_CHAIN
+		tflag = FLAG_SEQUENCE_SIG_NO_CHAIN
 	} else if longThreshold && !noChain {
-		tflag = FLAG_S_L_SIG
+		tflag = FLAG_SEQUENCE_L_SIG
 	} else {
-		tflag = FLAG_S_L_SIG_NO_CHAIN
+		tflag = FLAG_SEQUENCE_L_SIG_NO_CHAIN
 	}
 
 	buf.commitUint(tflag)
@@ -646,11 +646,11 @@ func (buf *Buffer) WriteSequenceSignatureTree(tree []byte) (EncodeType, error) {
 
 	if totalParts > 1 {
 		if totalParts > 255 {
-			buf.commitUint(FLAG_NESTED_N_FLAGS_L)
+			buf.commitUint(FLAG_SEQUENCE_NESTED_N_FLAGS_L)
 			buf.commitByte(byte(totalParts >> 8))
 			buf.commitByte(byte(totalParts))
 		} else {
-			buf.commitUint(FLAG_NESTED_N_FLAGS_S)
+			buf.commitUint(FLAG_SEQUENCE_NESTED_N_FLAGS_S)
 			buf.commitByte(byte(totalParts))
 		}
 	}
@@ -740,7 +740,7 @@ func (buf *Buffer) WriteSequenceNestedSignaturePart(weight uint, threshold uint,
 		return Stateless, fmt.Errorf("threshold exceeds 255")
 	}
 
-	buf.commitUint(FLAG_NESTED)
+	buf.commitUint(FLAG_SEQUENCE_NESTED)
 	buf.commitUint(weight)
 	buf.commitUint(threshold)
 	buf.end([]byte{}, Stateless)
@@ -753,7 +753,7 @@ func (buf *Buffer) WriteSequenceBranchSignaturePart(branch []byte) (EncodeType, 
 		return Stateless, fmt.Errorf("branch is empty")
 	}
 
-	buf.commitUint(FLAG_BRANCH)
+	buf.commitUint(FLAG_SEQUENCE_BRANCH)
 	buf.end([]byte{}, Stateless)
 
 	return buf.WriteSequenceSignatureTree(branch)
@@ -770,7 +770,7 @@ func (buf *Buffer) WriteSequenceDynamicSignaturePart(address []byte, weight uint
 
 	unsuffixed := signature[:len(signature)-1]
 
-	buf.commitUint(FLAG_DYNAMIC_SIGNATURE)
+	buf.commitUint(FLAG_SEQUENCE_DYNAMIC_SIGNATURE)
 	buf.commitUint(weight)
 	buf.end([]byte{}, Stateless)
 
@@ -815,11 +815,11 @@ func (buf *Buffer) WriteSequenceChainedSignature(signature []byte) (EncodeType, 
 	// depending on the number of parts
 	totalParts := uint(len(parts))
 	if totalParts > 255 {
-		buf.commitUint(FLAG_READ_CHAINED_L)
+		buf.commitUint(FLAG_SEQUENCE_READ_CHAINED_L)
 		buf.commitByte(byte(totalParts >> 8))
 		buf.commitByte(byte(totalParts))
 	} else {
-		buf.commitUint(FLAG_READ_CHAINED_S)
+		buf.commitUint(FLAG_SEQUENCE_READ_CHAINED_S)
 		buf.commitByte(byte(totalParts))
 	}
 
@@ -910,8 +910,8 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If the bytes are 33 bytes long, and the first byte is 0x03 it can be represented as a "node"
 	// cost: 0 bytes + word
-	if buf.Allows(FLAG_NODE) && len(bytes) == 33 && bytes[0] == 0x03 {
-		buf.commitUint(FLAG_NODE)
+	if buf.Allows(FLAG_SEQUENCE_NODE) && len(bytes) == 33 && bytes[0] == 0x03 {
+		buf.commitUint(FLAG_SEQUENCE_NODE)
 		buf.end(bytes, Stateless)
 
 		t, err := buf.WriteWord(bytes[1:], saveWord)
@@ -924,8 +924,8 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If the bytes are 33 bytes long and starts with 0x05 it can be represented as a "subdigest"
 	// cost: 0 bytes + word
-	if buf.Allows(FLAG_SUBDIGEST) && len(bytes) == 33 && bytes[0] == 0x05 {
-		buf.commitUint(FLAG_SUBDIGEST)
+	if buf.Allows(FLAG_SEQUENCE_SUBDIGEST) && len(bytes) == 33 && bytes[0] == 0x05 {
+		buf.commitUint(FLAG_SEQUENCE_SUBDIGEST)
 		buf.end(bytes, Stateless)
 
 		t, err := buf.WriteWord(bytes[1:], saveWord)
@@ -938,13 +938,13 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If bytes has 22 bytes and starts with 0x01, then it is probably an address on a signature
 	// cost: 1 / 0 bytes + address word
-	if buf.Allows(FLAG_ADDRESS_W0) && len(bytes) == 22 && bytes[0] == 0x01 {
+	if buf.Allows(FLAG_SEQUENCE_ADDRESS_W0) && len(bytes) == 22 && bytes[0] == 0x01 {
 		// If the firt byte (weight) is between 1 and 4, then there is a special flag
 		if bytes[1] >= 1 && bytes[1] <= 4 {
-			buf.commitUint(FLAG_ADDRESS_W0 + uint(bytes[1]))
+			buf.commitUint(FLAG_SEQUENCE_ADDRESS_W0 + uint(bytes[1]))
 		} else {
 			// We need to use FLAG_ADDRES_W0 and 1 extra byte for the weight
-			buf.commitUint(FLAG_ADDRESS_W0)
+			buf.commitUint(FLAG_SEQUENCE_ADDRESS_W0)
 			buf.commitByte(bytes[1])
 		}
 
@@ -960,13 +960,13 @@ func (buf *Buffer) WriteBytesOptimized(bytes []byte, saveWord bool) (EncodeType,
 
 	// If the bytes are 68 bytes long and starts with 0x00, the it is probably a signature for a Sequence wallet
 	// cost: 66/67 bytes
-	if buf.Allows(FLAG_SIGNATURE_W0) && len(bytes) == 68 && bytes[0] == 0x00 {
+	if buf.Allows(FLAG_SEQUENCE_SIGNATURE_W0) && len(bytes) == 68 && bytes[0] == 0x00 {
 		// If the first byte (weight) is between 1 and 4, then there is a special flag
 		if bytes[1] >= 1 && bytes[1] <= 4 {
-			buf.commitUint(FLAG_SIGNATURE_W0 + uint(bytes[1]))
+			buf.commitUint(FLAG_SEQUENCE_SIGNATURE_W0 + uint(bytes[1]))
 		} else {
-			// We need to use FLAG_SIGNATURE_W0 and 1 extra byte for the weight
-			buf.commitUint(FLAG_SIGNATURE_W0)
+			// We need to use FLAG_SEQUENCE_SIGNATURE_W0 and 1 extra byte for the weight
+			buf.commitUint(FLAG_SEQUENCE_SIGNATURE_W0)
 			buf.commitByte(bytes[1])
 		}
 
