@@ -321,6 +321,42 @@ A Sequence transaction is prefixed by a bitmap byte, this byte determines which 
 - `op: value` The value for the transaction.
 - `op: data` The data for the transaction.
 
+## FAQs
+
+### Can the Huff code be optimized?
+
+It probably can. This is my first time working with Huff, and this is a big contract. I am sure it can be gas-golfed further, but the gains should be minimal.
+
+### Does the compressor always generate the most efficient payload?
+
+No, the compressor is a bit naive in its current form. It should work well for most "common" cases, but it may not pick the best compression for all cases. If you want to improve this tool, I think the biggest gains can be made here.
+
+### Why doesn't it compress using X/Y/Z method?
+
+Because it didn't occur to me. The opcode set has a lot of room left for new operations. If you have a good idea for a new operation, please open an issue.
+
+### Why `callvalue` and not `push0`?
+
+I wanted to support all networks with the same code, and there is no reason to be sending funds to the decompressor contract. Notice that the behavior if `msg.value != 0` is undefined, so you have been warned.
+
+### Why not a built-in list of common contracts too?
+
+Again, I wanted the same code for all networks, and "common contracts" will look different on different networks. But it is something that could be added if a single network is the main target.
+
+### Can I reuse the decompressor indexes?
+
+Yes! The decompressor has the `0x05` "function" that allows you to fetch any storage slots from itself. If you build a similar contract, you can use it to fetch the indexes that the decompressor has stored.
+
+### Has this been audited?
+
+No.
+
+### How should I use this in my project?
+
+The contract is quite big and could have vulnerabilities, so I would not recommend "trusting" it in your setup. However, you can use it as long as it acts as a "router" or "entrypoint" to some other contract that validates the data.
+
+---
+
 ## Setup dev environment
 
 If you'd like to setup the dev environment to run tests:
@@ -329,8 +365,6 @@ If you'd like to setup the dev environment to run tests:
 2. Install [huff](https://docs.huff.sh/get-started/installing/)
 3. Install [go](https://go.dev/)
 4. `make bootstrap`
-
-
 ## Development
 
 If you'd like to develop on the repo, here are some useful commands:
