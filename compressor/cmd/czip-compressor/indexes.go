@@ -7,7 +7,9 @@ import (
 	"os"
 
 	"github.com/0xsequence/czip/compressor"
+	"github.com/0xsequence/ethkit/ethrpc"
 	"github.com/0xsequence/ethkit/go-ethereum/common"
+	"github.com/spf13/cobra"
 )
 
 func LoadCachedData(path string) (*compressor.Indexes, error) {
@@ -87,17 +89,23 @@ func toHumanReadable(from *compressor.Indexes) *compressor.Indexes {
 	return next
 }
 
-func UseIndexes(ctx context.Context, args *ParsedArgs) (*compressor.Indexes, error) {
+func UseIndexes(ctx context.Context, cmd *cobra.Command) (*compressor.Indexes, error) {
 	var indexes *compressor.Indexes
 
-	if ParseUseStorage(args) {
-		provider, err := ParseProvider(args)
+	useStorage, err := cmd.Flags().GetBool("use-storage")
+	if err != nil {
+		return nil, err
+	}
+
+	if useStorage {
+		providerUrl, err := cmd.Flags().GetString("provider")
 		if err != nil {
 			return nil, err
 		}
 
-		if provider == nil {
-			return nil, fmt.Errorf("provider is required")
+		provider, err := ethrpc.NewProvider(providerUrl)
+		if err != nil {
+			return nil, err
 		}
 
 		chainId, err := provider.ChainID(ctx)
@@ -106,23 +114,30 @@ func UseIndexes(ctx context.Context, args *ParsedArgs) (*compressor.Indexes, err
 		}
 
 		// Load the cache file
-		var path string
-		if flag, ok := args.Flags["cache-file"]; ok {
-			path = flag
-		} else {
-			path = fmt.Sprintf("/tmp/czip-indexes-%d.json", chainId)
+		cachePath, err := cmd.Flags().GetString("cache-dir")
+		if err != nil {
+			return nil, err
 		}
+
+		// If path does not exist, create it
+		err = ensureDir(cachePath)
+		if err != nil {
+			return nil, err
+		}
+
+		path := fmt.Sprintf("%s/czip-indexes-%d.json", cachePath, chainId)
 
 		indexes, err = LoadCachedData(path)
 		if err != nil {
 			return nil, err
 		}
 
-		contract, err := ParseContractAddress(args)
+		contractAddr, err := cmd.Flags().GetString("contract")
 		if err != nil {
 			return nil, err
 		}
 
+		contract := common.HexToAddress(contractAddr)
 		if contract == (common.Address{}) {
 			return nil, fmt.Errorf("contract address is required")
 		}

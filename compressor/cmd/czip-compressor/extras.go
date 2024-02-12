@@ -3,48 +3,53 @@ package main
 import (
 	"fmt"
 
+	"github.com/0xsequence/czip/compressor"
 	encoder "github.com/0xsequence/czip/compressor"
 	"github.com/0xsequence/ethkit/go-ethereum/common"
 	"github.com/0xsequence/go-sequence"
+	"github.com/spf13/cobra"
 )
 
-func encodeExtras(args *ParsedArgs) (string, error) {
-	if len(args.Positional) < 3 {
-		return "", fmt.Errorf("usage: encode_extra <code> <hex>")
-	}
+var extrasCmd = &cobra.Command{
+	Use:   "extras",
+	Short: "Additional encoding methods, used for testing and debugging.",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		data := common.FromHex(args[1])
 
-	data := common.FromHex(args.Positional[2])
-	buf := encoder.NewBuffer(encoder.METHOD_DECODE_ANY, nil, ParseAllowOpcodes(args), ParseUseStorage(args))
+		buf, err := useBuffer(compressor.METHOD_DECODE_ANY, cmd)
+		if err != nil {
+			fail(err)
+		}
 
-	var err error
+		switch args[0] {
+		case "FLAG_SEQUENCE_NESTED_N_WORDS":
+			buf.WriteNWords(data)
+		case "SEQUENCE_DYNAMIC_SIGNATURE_PART":
+			err = encodeSequenceDynamicSignaturePart(buf, data)
+		case "SEQUENCE_BRANCH_SIGNATURE_PART":
+			buf.WriteSequenceBranchSignaturePart(data)
+		case "SEQUENCE_NESTED_SIGNATURE_PART":
+			err = encodeSequenceNestedSignaturePart(buf, data)
+		case "SEQUENCE_CHAINED_SIGNATURE":
+			buf.WriteSequenceChainedSignature(data)
+		case "FLAG_SEQUENCE_SIG":
+			buf.WriteSequenceSignature(data, false)
+		case "FLAG_SEQUENCE_EXECUTE":
+			err = encodeSequenceExecute(buf, data)
+		case "FLAG_SEQUENCE_SELF_EXECUTE":
+			err = encodeSequenceSelfExecute(buf, data)
 
-	switch args.Positional[1] {
-	case "FLAG_SEQUENCE_NESTED_N_WORDS":
-		buf.WriteNWords(data)
-	case "SEQUENCE_DYNAMIC_SIGNATURE_PART":
-		err = encodeSequenceDynamicSignaturePart(buf, data)
-	case "SEQUENCE_BRANCH_SIGNATURE_PART":
-		buf.WriteSequenceBranchSignaturePart(data)
-	case "SEQUENCE_NESTED_SIGNATURE_PART":
-		err = encodeSequenceNestedSignaturePart(buf, data)
-	case "SEQUENCE_CHAINED_SIGNATURE":
-		buf.WriteSequenceChainedSignature(data)
-	case "FLAG_SEQUENCE_SIG":
-		buf.WriteSequenceSignature(data, false)
-	case "FLAG_SEQUENCE_EXECUTE":
-		err = encodeSequenceExecute(buf, data)
-	case "FLAG_SEQUENCE_SELF_EXECUTE":
-		err = encodeSequenceSelfExecute(buf, data)
+		default:
+			fail(fmt.Errorf("invalid method: %s", args[0]))
+		}
 
-	default:
-		return "", fmt.Errorf("unknown extra: %s", args.Positional[1])
-	}
+		if err != nil {
+			fail(err)
+		}
 
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("0x%x", buf.Commited), nil
+		fmt.Printf("0x%x\n", buf.Commited)
+	},
 }
 
 func encodeSequenceDynamicSignaturePart(buf *encoder.Buffer, data []byte) error {

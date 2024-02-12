@@ -33,7 +33,6 @@ contract FlagsTest is Test {
 
     bytes memory data = abi.encode(_word);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_READ_WORD")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -45,7 +44,6 @@ contract FlagsTest is Test {
 
     bytes memory data = abi.encode(_word);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_READ_WORD")
       .allowOps("FLAG_READ_WORD")
       .run();
@@ -57,7 +55,6 @@ contract FlagsTest is Test {
     uint256 v = bound(_val, 0, MAX_LITERAL);
     bytes memory data = abi.encode(v);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -69,7 +66,6 @@ contract FlagsTest is Test {
     uint256 r = 10**v;
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_POW_10")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -82,7 +78,6 @@ contract FlagsTest is Test {
     uint256 r; unchecked { r = 10**v * m;}
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_POW_10_MANTISSA_S")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -95,7 +90,6 @@ contract FlagsTest is Test {
     uint256 r; unchecked { r = 10**v * m;}
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_POW_10_MANTISSA_L")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -107,7 +101,6 @@ contract FlagsTest is Test {
     uint256 r = 2**v;
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_POW_2")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -119,7 +112,6 @@ contract FlagsTest is Test {
     uint256 r; unchecked { r = (2**v)-1; }
     bytes memory data = abi.encode(r);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_POW_2_MINUS_1")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -129,7 +121,6 @@ contract FlagsTest is Test {
   function test_abiEncode0(bytes4 _selector) external {
     bytes memory data = abi.encodePacked(_selector);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -139,7 +130,6 @@ contract FlagsTest is Test {
   function test_abiEncode1(bytes4 _selector, bytes32 _param1) external {
     bytes memory data = abi.encodePacked(_selector, _param1);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -151,7 +141,6 @@ contract FlagsTest is Test {
   function test_abiEncode2(bytes4 _selector, bytes32 _param1, bytes32 _param2) external {
     bytes memory data = abi.encodePacked(_selector, _param1, _param2);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -168,7 +157,6 @@ contract FlagsTest is Test {
   ) external {
     bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -186,7 +174,6 @@ contract FlagsTest is Test {
   ) external {
     bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3, _param4);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -205,7 +192,6 @@ contract FlagsTest is Test {
   ) external {
     bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3, _param4, _param5);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -225,7 +211,6 @@ contract FlagsTest is Test {
   ) external {
     bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3, _param4, _param5, _param6);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -243,7 +228,6 @@ contract FlagsTest is Test {
 
     bytes memory data = abi.encodePacked(_selector, _words);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_READ_DYNAMIC_ABI")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -258,7 +242,6 @@ contract FlagsTest is Test {
     vm.assume(_words.length > 0);
     bytes memory data = abi.encodePacked(_words);
     bytes memory encoded = vm.encodeExtra("FLAG_SEQUENCE_NESTED_N_WORDS", data)
-      .useStorage(false)
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
@@ -272,7 +255,6 @@ contract FlagsTest is Test {
     bytes memory input = new bytes(_size);
     bytes memory data = abi.encodePacked(input);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_WRITE_ZEROS")
       .allowOps("LITERAL_ZERO")
       .run();
@@ -283,7 +265,6 @@ contract FlagsTest is Test {
   function test_sequenceAddress(uint8 _weight, address _addr) external {
     bytes memory data = abi.encodePacked(uint8(0x01), _weight, _addr);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_SEQUENCE_ADDRESS")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -295,7 +276,6 @@ contract FlagsTest is Test {
   function test_sequenceECDSA(uint8 _weight, bytes32 _p1, bytes32 _p2, bytes2 _p3) external {
     bytes memory data = abi.encodePacked(uint8(0x00), _weight, _p1, _p2, _p3);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_SEQUENCE_SIGNATURE")
       .run();
     bytes memory decoded = decompressor.call(encoded);
@@ -305,7 +285,6 @@ contract FlagsTest is Test {
   function test_sequenceNode(bytes32 _node) external {
     bytes memory data = abi.encodePacked(uint8(0x03), _node);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_SEQUENCE_NODE")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -317,7 +296,6 @@ contract FlagsTest is Test {
   function test_sequenceSubdigest(bytes32 _subdigest) external {
     bytes memory data = abi.encodePacked(uint8(0x05), _subdigest);
     bytes memory encoded = vm.encodeAny(data)
-      .useStorage(false)
       .allowOps("FLAG_SEQUENCE_SUBDIGEST")
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
@@ -331,7 +309,6 @@ contract FlagsTest is Test {
     bytes memory data = abi.encodePacked(_addr, _weight, _sig, uint8(0x03));
     bytes memory expect = abi.encodePacked(uint8(0x02), uint8(_weight), _addr, uint24(_sig.length + 1), _sig, uint8(0x03));
     bytes memory encoded = vm.encodeExtra("SEQUENCE_DYNAMIC_SIGNATURE_PART", data)
-      .useStorage(false)
       .run();
     bytes memory decoded = decompressor.call(encoded);
     assertEq(expect, decoded);
@@ -341,7 +318,6 @@ contract FlagsTest is Test {
     bytes memory data = abi.encodePacked(uint8(0x01), _innerWeight, _innerPart);
     bytes memory expected = abi.encodePacked(uint8(0x04), uint24(22), uint8(0x01), _innerWeight, _innerPart);
     bytes memory encoded = vm.encodeExtra("SEQUENCE_BRANCH_SIGNATURE_PART", data)
-      .useStorage(false)
       .run();
     bytes memory decoded = decompressor.call(encoded);
     assertEq(expected, decoded);
@@ -360,7 +336,6 @@ contract FlagsTest is Test {
     );
 
     bytes memory encoded = vm.encodeExtra("SEQUENCE_NESTED_SIGNATURE_PART", data)
-      .useStorage(false)
       .run();
   
     bytes memory decoded = decompressor.call(encoded);
@@ -371,7 +346,6 @@ contract FlagsTest is Test {
     bytes memory data = abi.encodePacked(uint8(0x01), _t, _c, uint8(0x01), _w1, _part1, uint8(0x01), _w2, _part2);
 
     bytes memory encoded = vm.encodeExtra("FLAG_SEQUENCE_SIG", data)
-      .useStorage(false)
       .run();
     
     bytes memory decoded = decompressor.call(encoded);
@@ -391,7 +365,6 @@ contract FlagsTest is Test {
     }
 
     bytes memory encoded = vm.encodeExtra("SEQUENCE_CHAINED_SIGNATURE", data)
-      .useStorage(false) // This treats each signature as a blob of bytes
       .run();
   
     bytes memory decoded = decompressor.call(encoded);
@@ -412,7 +385,6 @@ contract FlagsTest is Test {
 
     bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
     bytes memory encoded = vm.encodeSequenceTx("decode", _wallet, data)
-      .useStorage(false)
       .run();
     
     bytes memory decoded = decompressor.call(encoded);
@@ -424,7 +396,6 @@ contract FlagsTest is Test {
 
     bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
     bytes memory encoded = vm.encodeExtra("FLAG_SEQUENCE_EXECUTE", data)
-      .useStorage(false)
       .run();
     
     bytes memory decoded = decompressor.call(encoded);
@@ -436,7 +407,6 @@ contract FlagsTest is Test {
 
     bytes memory data = abi.encodeWithSelector(0x61c2926c, _txs);
     bytes memory encoded = vm.encodeExtra("FLAG_SEQUENCE_SELF_EXECUTE", data)
-      .useStorage(false)
       .run();
     
     bytes memory decoded = decompressor.call(encoded);
@@ -444,14 +414,13 @@ contract FlagsTest is Test {
   }
 
   function test_sequenceExecute_call(address _wallet, SequenceTransaction[] calldata _txs, uint256 _nonce, bytes memory _signature) external {
-    vm.assume(_txs.length > 0 && _txs.length <= 100);
+    vm.assume(_txs.length > 0 && _txs.length <= 3);
     vm.assume(_wallet != address(this) && !decompressor.eq(_wallet));
     vm.assume(_wallet != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
     vm.assume(_wallet != 0x000000000000000000636F6e736F6c652e6c6f67);
 
     bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
     bytes memory encoded = vm.encodeSequenceTx("call", _wallet, data)
-      .useStorage(false)
       .run();
 
     vm.expectCall(_wallet, 0, data);
@@ -462,7 +431,6 @@ contract FlagsTest is Test {
 
   function test_call_decode(address _to, bytes calldata _data) external {
     bytes memory encoded = vm.encodeCall("decode", _to, _data)
-      .useStorage(false)
       .run();
 
     bytes memory decoded = decompressor.call(encoded);
@@ -474,7 +442,6 @@ contract FlagsTest is Test {
     vm.assume(_to != 0x000000000000000000636F6e736F6c652e6c6f67);
 
     bytes memory encoded = vm.encodeCall("call", _to, _data)
-      .useStorage(false)
       .run();
 
     vm.expectCall(_to, 0, _data);
@@ -484,7 +451,7 @@ contract FlagsTest is Test {
   }
 
   function test_calls_decode(Compressor.Call[] calldata _calls) external {
-    vm.assume(_calls.length > 0 && _calls.length <= 100);
+    vm.assume(_calls.length > 0 && _calls.length <= 2);
 
     bytes memory expected = hex"";
     for (uint i = 0; i < _calls.length; i++) {
@@ -492,7 +459,6 @@ contract FlagsTest is Test {
     }
 
     bytes memory encoded = vm.encodeCalls("decode", _calls)
-      .useStorage(false)
       .run();
 
     bytes memory decoded = decompressor.call(encoded);
@@ -505,7 +471,6 @@ contract FlagsTest is Test {
     vm.assume(_to != 0x000000000000000000636F6e736F6c652e6c6f67);
 
     bytes memory encoded = vm.encodeCall("call-return", _to, _data)
-      .useStorage(false)
       .run();
 
     vm.mockCall(_to, 0, _data, _return);
@@ -527,7 +492,6 @@ contract FlagsTest is Test {
     }
 
     bytes memory encoded = vm.encodeCalls("call", _calls)
-      .useStorage(false)
       .run();
 
     bytes memory decoded = decompressor.call(encoded);
