@@ -139,7 +139,7 @@ func UseIndexes(ctx context.Context, cmd *cobra.Command) (*compressor.Indexes, e
 
 		contract := common.HexToAddress(contractAddr)
 		if contract == (common.Address{}) {
-			return nil, fmt.Errorf("contract address is required")
+			return nil, fmt.Errorf("contract address is required, use --contract")
 		}
 
 		// Get the highest indexes for addresses and bytes32

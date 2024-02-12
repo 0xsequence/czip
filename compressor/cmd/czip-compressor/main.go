@@ -31,7 +31,7 @@ func init() {
 	rootCmd.PersistentFlags().StringP("provider", "p", "", "Ethereum RPC provider URL.")
 	rootCmd.PersistentFlags().StringP("contract", "c", "", "Contract address of the decompressor contract.")
 	rootCmd.PersistentFlags().String("cache-dir", "/tmp/czip-cache", "Path to the cache dir for indexes.")
-	rootCmd.MarkFlagsRequiredTogether("provider", "contract", "use-storage")
+	rootCmd.MarkFlagsRequiredTogether("provider", "contract")
 
 	rootCmd.PersistentFlags().StringSlice("allow-opcodes", []string{}, "Will only encode using these operations, separated by commas.")
 	rootCmd.PersistentFlags().StringSlice("disallow-opcodes", []string{}, "Will not encode using these operations, separated by commas.")
