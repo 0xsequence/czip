@@ -5,6 +5,7 @@ import (
 
 	encoder "github.com/0xsequence/czip/compressor"
 	"github.com/0xsequence/ethkit/go-ethereum/common"
+	"github.com/0xsequence/go-sequence"
 )
 
 func encodeExtras(args *ParsedArgs) (string, error) {
@@ -28,6 +29,12 @@ func encodeExtras(args *ParsedArgs) (string, error) {
 		err = encodeSequenceNestedSignaturePart(buf, data)
 	case "SEQUENCE_CHAINED_SIGNATURE":
 		buf.WriteSequenceChainedSignature(data)
+	case "FLAG_SEQUENCE_SIG":
+		buf.WriteSequenceSignature(data, false)
+	case "FLAG_SEQUENCE_EXECUTE":
+		err = encodeSequenceExecute(buf, data)
+	case "FLAG_SEQUENCE_SELF_EXECUTE":
+		err = encodeSequenceSelfExecute(buf, data)
 
 	default:
 		return "", fmt.Errorf("unknown extra: %s", args.Positional[1])
@@ -65,4 +72,32 @@ func encodeSequenceNestedSignaturePart(buf *encoder.Buffer, data []byte) error {
 	signature := data[2:]
 	buf.WriteSequenceNestedSignaturePart(weight, threshold, signature)
 	return nil
+}
+
+func encodeSequenceExecute(buf *encoder.Buffer, data []byte) error {
+	txs, nonce, sig, err := sequence.DecodeExecdata(data)
+	if err != nil {
+		return err
+	}
+
+	_, err = buf.WriteSequenceExecuteFlag(&sequence.Transaction{
+		Nonce:        nonce,
+		Transactions: txs,
+		Signature:    sig,
+	})
+
+	return err
+}
+
+func encodeSequenceSelfExecute(buf *encoder.Buffer, data []byte) error {
+	txs, _, _, err := sequence.DecodeExecdata(data)
+	if err != nil {
+		return err
+	}
+
+	_, err = buf.WriteSequenceSelfExecuteFlag(&sequence.Transaction{
+		Transactions: txs,
+	})
+
+	return err
 }

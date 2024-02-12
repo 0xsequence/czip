@@ -483,10 +483,7 @@ func (buf *Buffer) WriteSequenceTransaction(tx *sequence.Transaction) (EncodeTyp
 		var t EncodeType
 
 		if len(tx.Transactions) > 0 {
-			buf.commitUint(FLAG_SEQUENCE_EXECUTE)
-			buf.end([]byte{}, Stateless)
-
-			t, err = buf.WriteSequenceExecute(nil, tx)
+			t, err = buf.WriteSequenceExecuteFlag(tx)
 		} else {
 			t, err = buf.WriteBytesOptimized(tx.Data, buf.Refs.useContractStorage)
 		}
@@ -499,6 +496,18 @@ func (buf *Buffer) WriteSequenceTransaction(tx *sequence.Transaction) (EncodeTyp
 	}
 
 	return encodeType, nil
+}
+
+func (buf *Buffer) WriteSequenceExecuteFlag(transaction *sequence.Transaction) (EncodeType, error) {
+	buf.commitUint(FLAG_SEQUENCE_EXECUTE)
+	buf.end([]byte{}, Stateless)
+	return buf.WriteSequenceExecute(nil, transaction)
+}
+
+func (buf *Buffer) WriteSequenceSelfExecuteFlag(transaction *sequence.Transaction) (EncodeType, error) {
+	buf.commitUint(FLAG_SEQUENCE_SELF_EXECUTE)
+	buf.end([]byte{}, Stateless)
+	return buf.WriteSequenceTransactions(transaction.Transactions)
 }
 
 func (buf *Buffer) WriteSequenceExecute(to []byte, transaction *sequence.Transaction) (EncodeType, error) {

@@ -367,6 +367,17 @@ contract FlagsTest is Test {
     assertEq(expected, decoded);
   }
 
+  function test_sequenceSignature(uint16 _t, uint32 _c, uint8 _w1, address _part1, uint8 _w2, address _part2) external {
+    bytes memory data = abi.encodePacked(uint8(0x01), _t, _c, uint8(0x01), _w1, _part1, uint8(0x01), _w2, _part2);
+
+    bytes memory encoded = vm.encodeExtra("FLAG_SEQUENCE_SIG", data)
+      .useStorage(false)
+      .run();
+    
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(data, decoded);
+  }
+
   function test_sequenceChainedSignature(address[] calldata _parts) external {
     vm.assume(_parts.length > 0);
 
@@ -406,6 +417,30 @@ contract FlagsTest is Test {
     
     bytes memory decoded = decompressor.call(encoded);
     assertEq(abi.encodePacked(data, abi.encode(_wallet)), decoded);
+  }
+
+  function test_sequenceExecute_flag(SequenceTransaction[] calldata _txs, uint256 _nonce, bytes memory _signature) external {
+    vm.assume(_txs.length > 0 && _txs.length <= 100);
+
+    bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
+    bytes memory encoded = vm.encodeExtra("FLAG_SEQUENCE_EXECUTE", data)
+      .useStorage(false)
+      .run();
+    
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(data, decoded);
+  }
+
+  function test_sequenceSelfExecute_flag(SequenceTransaction[] calldata _txs) external {
+    vm.assume(_txs.length > 0 && _txs.length <= 100);
+
+    bytes memory data = abi.encodeWithSelector(0x61c2926c, _txs);
+    bytes memory encoded = vm.encodeExtra("FLAG_SEQUENCE_SELF_EXECUTE", data)
+      .useStorage(false)
+      .run();
+    
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(data, decoded);
   }
 
   function test_sequenceExecute_call(address _wallet, SequenceTransaction[] calldata _txs, uint256 _nonce, bytes memory _signature) external {

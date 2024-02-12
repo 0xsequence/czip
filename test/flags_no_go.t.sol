@@ -75,6 +75,30 @@ uint8 constant FLAG_COPY_CALLDATA_S    = 0x3f;
 uint8 constant FLAG_COPY_CALLDATA_L    = 0x40;
 uint8 constant FLAG_COPY_CALLDATA_XL   = 0x41;
 
+uint8 constant FLAG_SEQUENCE_EXECUTE           = 0x42;
+uint8 constant FLAG_SEQUENCE_SELF_EXECUTE      = 0x43;
+uint8 constant FLAG_SEQUENCE_SIGNATURE_W0      = 0x44;
+uint8 constant FLAG_SEQUENCE_SIGNATURE_W1      = 0x45;
+uint8 constant FLAG_SEQUENCE_SIGNATURE_W2      = 0x46;
+uint8 constant FLAG_SEQUENCE_SIGNATURE_W3      = 0x47;
+uint8 constant FLAG_SEQUENCE_SIGNATURE_W4      = 0x48;
+uint8 constant FLAG_SEQUENCE_ADDRESS_W0        = 0x49;
+uint8 constant FLAG_SEQUENCE_ADDRESS_W1        = 0x4a;
+uint8 constant FLAG_SEQUENCE_ADDRESS_W2        = 0x4b;
+uint8 constant FLAG_SEQUENCE_ADDRESS_W3        = 0x4c;
+uint8 constant FLAG_SEQUENCE_ADDRESS_W4        = 0x4d;
+uint8 constant FLAG_SEQUENCE_NODE              = 0x4e;
+uint8 constant FLAG_SEQUENCE_BRANCH            = 0x4f;
+uint8 constant FLAG_SEQUENCE_SUBDIGEST         = 0x50;
+uint8 constant FLAG_SEQUENCE_NESTED            = 0x51;
+uint8 constant FLAG_SEQUENCE_DYNAMIC_SIGNATURE = 0x52;
+uint8 constant FLAG_SEQUENCE_SIG_NO_CHAIN      = 0x53;
+uint8 constant FLAG_SEQUENCE_SIG               = 0x54;
+uint8 constant FLAG_SEQUENCE_L_SIG_NO_CHAIN    = 0x55;
+uint8 constant FLAG_SEQUENCE_L_SIG             = 0x56;
+uint8 constant FLAG_SEQUENCE_READ_CHAINED_S    = 0x57;
+uint8 constant FLAG_SEQUENCE_READ_CHAINED_L    = 0x58;
+
 contract FlagsTestNoGo is Test {
   using Decompressor for Decompressor.DContract;
   using Compressor for Compressor.CommandBuffer;
@@ -344,6 +368,143 @@ contract FlagsTestNoGo is Test {
       uint24(2),
       FLAG_READ_BYTES32_4,
       uint32(3)
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readSignatureW0(uint8 _w, bytes32 _a, bytes32 _b, bytes2 _c) external {
+    bytes memory data = abi.encodePacked(uint8(0x00), _w, _a, _b, _c);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_SIGNATURE_W0,
+      _w,
+      _a,
+      _b,
+      _c
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readSignatureW1(bytes32 _a, bytes32 _b, bytes2 _c) external {
+    bytes memory data = abi.encodePacked(uint8(0x00), uint8(1), _a, _b, _c);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_SIGNATURE_W1,
+      _a,
+      _b,
+      _c
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readSignatureW2(bytes32 _a, bytes32 _b, bytes2 _c) external {
+    bytes memory data = abi.encodePacked(uint8(0x00), uint8(2), _a, _b, _c);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_SIGNATURE_W2,
+      _a,
+      _b,
+      _c
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readSignatureW3(bytes32 _a, bytes32 _b, bytes2 _c) external {
+    bytes memory data = abi.encodePacked(uint8(0x00), uint8(3), _a, _b, _c);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_SIGNATURE_W3,
+      _a,
+      _b,
+      _c
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readSignatureW4(bytes32 _a, bytes32 _b, bytes2 _c) external {
+    bytes memory data = abi.encodePacked(uint8(0x00), uint8(4), _a, _b, _c);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_SIGNATURE_W4,
+      _a,
+      _b,
+      _c
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readAddressW0(uint8 _w, address _addr) external {
+    bytes memory data = abi.encodePacked(uint8(0x01), _w, _addr);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_ADDRESS_W0,
+      _w,
+      FLAG_READ_WORD_20,
+      _addr
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readAddressW1(address _addr) external {
+    bytes memory data = abi.encodePacked(uint8(0x01), uint8(1), _addr);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_ADDRESS_W1,
+      FLAG_READ_WORD_20,
+      _addr
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readAddressW2(address _addr) external {
+    bytes memory data = abi.encodePacked(uint8(0x01), uint8(2), _addr);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_ADDRESS_W2,
+      FLAG_READ_WORD_20,
+      _addr
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readAddressW3(address _addr) external {
+    bytes memory data = abi.encodePacked(uint8(0x01), uint8(3), _addr);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_ADDRESS_W3,
+      FLAG_READ_WORD_20,
+      _addr
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readAddressW4(address _addr) external {
+    bytes memory data = abi.encodePacked(uint8(0x01), uint8(4), _addr);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SEQUENCE_ADDRESS_W4,
+      FLAG_READ_WORD_20,
+      _addr
     );
 
     bytes memory decoded = decompressor.call(encoded);
