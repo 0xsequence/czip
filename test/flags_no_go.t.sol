@@ -193,5 +193,160 @@ contract FlagsTestNoGo is Test {
 
     bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
+    assertEq(decompressor.addrSize(), 1);
+    assertEq(decompressor.getAddress(1), _addr);
+  }
+
+  function test_writeBytes32(bytes32 _b) external {
+    bytes memory data = abi.encode(_b);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_SAVE_BYTES32,
+      _b
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(data, decoded);
+    assertEq(decompressor.bytes32Size(), 1);
+    assertEq(decompressor.getBytes32(1), _b);
+  }
+
+  function test_writeBoth(bytes32[3] calldata _bs, address[2] calldata _addrs) external {
+    bytes memory data = abi.encode(
+      _bs[0],
+      _bs[1],
+      _addrs[0],
+      _bs[2],
+      _addrs[1]
+    );
+
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_NESTED_N_FLAGS_S,
+      uint8(5),
+      FLAG_SAVE_BYTES32,
+      _bs[0],
+      FLAG_SAVE_BYTES32,
+      _bs[1],
+      FLAG_SAVE_ADDRESS,
+      _addrs[0],
+      FLAG_SAVE_BYTES32,
+      _bs[2],
+      FLAG_SAVE_ADDRESS,
+      _addrs[1]
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(data, decoded);
+    assertEq(decompressor.addrSize(), 2);
+    assertEq(decompressor.bytes32Size(), 3);
+    assertEq(decompressor.getBytes32(1), _bs[0]);
+    assertEq(decompressor.getBytes32(2), _bs[1]);
+    assertEq(decompressor.getBytes32(3), _bs[2]);
+    assertEq(decompressor.getAddress(1), _addrs[0]);
+    assertEq(decompressor.getAddress(2), _addrs[1]);
+  }
+
+  function test_mirrorAddrStorage(address _addr) external {
+    bytes memory data = abi.encode(_addr, _addr);
+
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_NESTED_N_FLAGS_S,
+      uint8(2),
+      FLAG_SAVE_ADDRESS,
+      _addr,
+      FLAG_READ_STORE_FLAG_S,
+      uint16(3)
+    );
+
+    vm.record();
+    bytes memory decoded = decompressor.call(encoded);
+    (bytes32[] memory reads, bytes32[] memory writes) = vm.accesses(Decompressor.DContract.unwrap(decompressor));
+
+    assertEq(data, decoded);
+    assertEq(reads.length, 3);
+    assertEq(writes.length, 2);
+  }
+
+  function test_mirrorBytesStorage(bytes32 _b) external {
+    bytes memory data = abi.encode(_b, _b);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_NESTED_N_FLAGS_S,
+      uint8(2),
+      FLAG_SAVE_BYTES32,
+      _b,
+      FLAG_READ_STORE_FLAG_L,
+      uint24(3)
+    );
+
+    vm.record();
+    bytes memory decoded = decompressor.call(encoded);
+    (bytes32[] memory reads, bytes32[] memory writes) = vm.accesses(Decompressor.DContract.unwrap(decompressor));
+
+    assertEq(data, decoded);
+    assertEq(reads.length, 3);
+    assertEq(writes.length, 2);
+  }
+
+  function test_readAddressStorage(address[3] calldata _addrs) external {
+    decompressor.call(abi.encodePacked(
+      DECODE_ANY,
+      FLAG_NESTED_N_FLAGS_L,
+      uint16(3),
+      FLAG_SAVE_ADDRESS,
+      _addrs[0],
+      FLAG_SAVE_ADDRESS,
+      _addrs[1],
+      FLAG_SAVE_ADDRESS,
+      _addrs[2]
+    ));
+
+    bytes memory data = abi.encode(_addrs[0], _addrs[1], _addrs[2]);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_NESTED_N_FLAGS_S,
+      uint8(3),
+      FLAG_READ_ADDRESS_2,
+      uint16(1),
+      FLAG_READ_ADDRESS_3,
+      uint24(2),
+      FLAG_READ_ADDRESS_4,
+      uint32(3)
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
+  }
+
+  function test_readBytes32Storage(bytes32[3] calldata _bs) external {
+    decompressor.call(abi.encodePacked(
+      DECODE_ANY,
+      FLAG_NESTED_N_FLAGS_L,
+      uint16(3),
+      FLAG_SAVE_BYTES32,
+      _bs[0],
+      FLAG_SAVE_BYTES32,
+      _bs[1],
+      FLAG_SAVE_BYTES32,
+      _bs[2]
+    ));
+
+    bytes memory data = abi.encode(_bs[0], _bs[1], _bs[2]);
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_NESTED_N_FLAGS_S,
+      uint8(3),
+      FLAG_READ_BYTES32_2,
+      uint16(1),
+      FLAG_READ_BYTES32_3,
+      uint24(2),
+      FLAG_READ_BYTES32_4,
+      uint32(3)
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, data);
   }
 }
