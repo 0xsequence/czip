@@ -510,4 +510,106 @@ contract FlagsTestNoGo is Test {
     bytes memory decoded = decompressor.call(encoded);
     assertEq(decoded, data);
   }
+
+  function test_encodeDynamicABI_simple(
+    bytes4 _selector,
+    bytes32 _arg1,
+    bytes calldata _arg2
+  ) external {
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_READ_DYNAMIC_ABI,
+      uint8(0),
+      _selector,
+      uint8(2),
+      uint8((
+        uint8(1) << 1
+      ))
+    );
+
+    encoded = abi.encodePacked(
+      encoded,
+      FLAG_READ_WORD_32,
+      _arg1,
+      FLAG_READ_N_BYTES,
+      FLAG_READ_WORD_8,
+      uint64(_arg2.length),
+      _arg2
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, abi.encodeWithSelector(
+      _selector,
+      _arg1,
+      _arg2
+    ));
+  }
+
+  function test_encodeDynamicABI(
+    bytes4 _selector,
+    bytes32 _arg1,
+    bytes32 _arg2,
+    bytes calldata _arg3,
+    bytes32 _arg4,
+    bytes calldata _arg5,
+    bytes calldata _arg6
+  ) external {
+    bytes memory encoded = abi.encodePacked(
+      DECODE_ANY,
+      FLAG_READ_DYNAMIC_ABI,
+      uint8(0),
+      _selector,
+      uint8(6),
+      uint8((
+        uint8(1) << 2 |
+        uint8(1) << 4 |
+        uint8(1) << 5
+      ))
+    );
+
+    encoded = abi.encodePacked(
+      encoded,
+      FLAG_READ_WORD_32,
+      _arg1,
+      FLAG_READ_WORD_32,
+      _arg2
+    );
+
+    encoded = abi.encodePacked(
+      encoded,
+      FLAG_READ_N_BYTES,
+      FLAG_READ_WORD_4,
+      uint32(_arg3.length),
+      _arg3
+    );
+
+    encoded = abi.encodePacked(
+      encoded,
+      FLAG_READ_WORD_32,
+      _arg4,
+      FLAG_READ_N_BYTES,
+      FLAG_READ_WORD_8,
+      uint64(_arg5.length),
+      _arg5
+    );
+
+    encoded = abi.encodePacked(
+      encoded,
+      FLAG_READ_N_BYTES,
+      FLAG_READ_WORD_16,
+      uint128(_arg6.length),
+      _arg6
+    );
+
+    bytes memory decoded = decompressor.call(encoded);
+    assertEq(decoded, abi.encodeWithSelector(
+      _selector,
+      _arg1,
+      _arg2,
+      _arg3,
+      _arg4,
+      _arg5,
+      _arg6
+    ));
+  }
 }
