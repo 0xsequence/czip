@@ -1,7 +1,9 @@
 #!/bin/sh
 
-# Create build dir if it doesn't exist
-mkdir -p build
+set -e
+
+# Delete the old bin if it exists
+rm -f ./compressor/bin/*
 
 # Compile ./encoder/main.go to ./build/main
 cd ./compressor && make build-cli && cd ..

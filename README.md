@@ -22,6 +22,33 @@ The compressor has the following commands:
 - `encode_any <data>` Encodes any data into a compressed representation.
 - `encode_sequence_tx <decode/call> <sequence_tx> <sequence_wallet>` Compresses a Sequence wallet transaction.
 
+```
+czip-compressor is a tool for compressing Ethereum calldata. The compressed data can be decompressed using the decompressor contract.
+
+Usage:
+  czip-compressor [command]
+
+Available Commands:
+  completion         Generate the autocompletion script for the specified shell
+  encode_any         Compress any calldata: <hex>
+  encode_call        Compress a call to a contract: <data> <to>
+  encode_calls       Compress a sequence of calls: <data> <to> <data> <to> ... <data> <to>
+  encode_sequence_tx Compress a sequence of transactions
+  extras             Additional encoding methods, used for testing and debugging.
+  help               Help about any command
+
+Flags:
+      --allow-opcodes strings      Will only encode using these operations, separated by commas.
+      --cache-dir string           Path to the cache dir for indexes. (default "/tmp/czip-cache")
+  -c, --contract string            Contract address of the decompressor contract.
+      --disallow-opcodes strings   Will not encode using these operations, separated by commas.
+  -h, --help                       help for czip-compressor
+  -p, --provider string            Ethereum RPC provider URL.
+  -s, --use-storage                Use stateful read/write storage during compression.
+
+Use "czip-compressor [command] --help" for more information about a command.
+```
+
 ### Encode call
 
 It encodes a single call to a contract, the subcommands are:
