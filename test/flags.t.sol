@@ -4,30 +4,27 @@ pragma solidity ^0.8.0;
 import "foundry-huff/HuffDeployer.sol";
 import "forge-std/Test.sol";
 
-import "./utils/encoder.sol";
+import "./utils/decompressor.sol";
+import "./utils/compressor.sol";
 
 contract FlagsTest is Test {
-  using Encoder for Encoder.CommandBuffer;
-  using Encoder for Vm;
+  using Decompressor for Decompressor.DContract;
+  using Compressor for Compressor.CommandBuffer;
+  using Compressor for Vm;
+
 
   uint256 MAX_LITERAL = type(uint8).max - (88 + 1);
 
-  address public compressor;
+  Decompressor.DContract public decompressor;
 
   function setUp() public {
-    compressor = HuffDeployer.deploy("decompressor");
-  }
-
-  function decode(bytes memory _data) internal returns (bytes memory) {
-    (bool res, bytes memory decoded) = compressor.call{ gas: 300000000 }(_data);
-    require(res, "Failed to decode");
-    return decoded;
+    decompressor = Decompressor.deploy();
   }
 
   function test_noop() external {
     bytes memory data = bytes("");
     bytes memory encoded = vm.encodeAny(data).run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -39,7 +36,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("FLAG_READ_WORD")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -52,7 +49,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_READ_WORD")
       .allowOps("FLAG_READ_WORD")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -63,7 +60,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("LITERAL_ZERO")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -75,7 +72,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("FLAG_POW_10")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -88,7 +85,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("FLAG_POW_10_MANTISSA_S")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -101,7 +98,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("FLAG_POW_10_MANTISSA_L")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -113,7 +110,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("FLAG_POW_2")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -125,7 +122,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("FLAG_POW_2_MINUS_1")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -135,7 +132,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -147,7 +144,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -160,7 +157,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -179,7 +176,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -200,7 +197,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -223,7 +220,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -248,7 +245,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -266,7 +263,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -280,7 +277,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -294,7 +291,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_WRITE_ZEROS")
       .allowOps("LITERAL_ZERO")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -306,7 +303,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -316,7 +313,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .allowOps("FLAG_SEQUENCE_SIGNATURE")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -328,7 +325,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -340,7 +337,7 @@ contract FlagsTest is Test {
       .allowOps("FLAG_READ_WORD")
       .allowOps("LITERAL_ZERO")
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
@@ -351,7 +348,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeExtra("SEQUENCE_DYNAMIC_SIGNATURE_PART", data)
       .useStorage(false)
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(expect, decoded);
   }
 
@@ -361,7 +358,7 @@ contract FlagsTest is Test {
     bytes memory encoded = vm.encodeExtra("SEQUENCE_BRANCH_SIGNATURE_PART", data)
       .useStorage(false)
       .run();
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(expected, decoded);
   }
 
@@ -381,7 +378,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .run();
   
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(expected, decoded);
   }
 
@@ -401,7 +398,7 @@ contract FlagsTest is Test {
       .useStorage(false) // This treats each signature as a blob of bytes
       .run();
   
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(expected, decoded);
   }
 
@@ -422,14 +419,15 @@ contract FlagsTest is Test {
       .useStorage(false)
       .run();
     
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(abi.encodePacked(data, abi.encode(_wallet)), decoded);
   }
 
   function test_sequenceExecute_call(address _wallet, SequenceTransaction[] calldata _txs, uint256 _nonce, bytes memory _signature) external {
     vm.assume(_txs.length > 0 && _txs.length <= 100);
-    vm.assume(_wallet != address(this) && _wallet != compressor);
+    vm.assume(_wallet != address(this) && !decompressor.eq(_wallet));
     vm.assume(_wallet != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+    vm.assume(_wallet != 0x000000000000000000636F6e736F6c652e6c6f67);
 
     bytes memory data = abi.encodeWithSelector(0x7a9a1628, _txs, _nonce, _signature);
     bytes memory encoded = vm.encodeSequenceTx("call", _wallet, data)
@@ -438,7 +436,7 @@ contract FlagsTest is Test {
 
     vm.expectCall(_wallet, 0, data);
 
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(decoded.length, 0);
   }
 
@@ -447,12 +445,13 @@ contract FlagsTest is Test {
       .useStorage(false)
       .run();
 
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(abi.encodePacked(_data, abi.encode(_to)), decoded);
   }
 
   function test_call_call(address _to, bytes calldata _data) external {
     vm.assume(_to != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+    vm.assume(_to != 0x000000000000000000636F6e736F6c652e6c6f67);
 
     bytes memory encoded = vm.encodeCall("call", _to, _data)
       .useStorage(false)
@@ -460,11 +459,11 @@ contract FlagsTest is Test {
 
     vm.expectCall(_to, 0, _data);
 
-    bytes memory res = decode(encoded);
+    bytes memory res = decompressor.call(encoded);
     assertEq(res.length, 0);
   }
 
-  function test_calls_decode(Encoder.Call[] calldata _calls) external {
+  function test_calls_decode(Compressor.Call[] calldata _calls) external {
     vm.assume(_calls.length > 0 && _calls.length <= 100);
 
     bytes memory expected = hex"";
@@ -476,13 +475,14 @@ contract FlagsTest is Test {
       .useStorage(false)
       .run();
 
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(expected, decoded);
   }
 
   function test_call_and_return(address _to, bytes calldata _data, bytes calldata _return) external {
-    vm.assume(_to != address(this) && _to != compressor);
+    vm.assume(_to != address(this) && !decompressor.eq(_to));
     vm.assume(_to != 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+    vm.assume(_to != 0x000000000000000000636F6e736F6c652e6c6f67);
 
     bytes memory encoded = vm.encodeCall("call-return", _to, _data)
       .useStorage(false)
@@ -490,11 +490,11 @@ contract FlagsTest is Test {
 
     vm.mockCall(_to, 0, _data, _return);
 
-    bytes memory res = decode(encoded);
+    bytes memory res = decompressor.call(encoded);
     assertEq(res, _return);
   }
 
-  function test_calls_call(Encoder.Call[] memory _calls) external {
+  function test_calls_call(Compressor.Call[] memory _calls) external {
     vm.assume(_calls.length > 0 && _calls.length <= 64);
 
     // Re-hash all `to` so they point to different addresses
@@ -510,7 +510,7 @@ contract FlagsTest is Test {
       .useStorage(false)
       .run();
 
-    bytes memory decoded = decode(encoded);
+    bytes memory decoded = decompressor.call(encoded);
     assertEq(decoded.length, 0);
   }
 }

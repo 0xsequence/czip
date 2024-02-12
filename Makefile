@@ -17,10 +17,13 @@ check-huffc:
 forge:
 	forge install
 
-build: build-czip-compressor
+build: build-czip-compressor build-decompressor
 
 build-czip-compressor:
 	@cd compressor; make build
+
+build-decompressor:
+	@huffc ./src/decompressor.huff -e paris -b > ./build/decompressor
 
 test: build-czip-compressor
 	@forge test

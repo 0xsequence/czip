@@ -1172,7 +1172,6 @@
   // output stack: [windex, rindex]
 }
 
-
 #define macro READ_NESTED(nrfs) = takes (2) returns (2) {
   // input stack: [windex, rindex]
 
