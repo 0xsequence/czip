@@ -30,10 +30,10 @@ Usage:
 
 Available Commands:
   completion         Generate the autocompletion script for the specified shell
-  encode_any         Compress any calldata: <hex>
-  encode_call        Compress a call to a contract: <data> <to>
-  encode_calls       Compress a sequence of calls: <data> <to> <data> <to> ... <data> <to>
-  encode_sequence_tx Compress a sequence of transactions
+  encode-any         Compress any calldata: <hex>
+  encode-call        Compress a call to a contract: <data> <to>
+  encode-calls       Compress multiple calls to many contracts: <data> <to> <data> <to> ... <data> <to>
+  encode-sequence-tx Compress a Sequence Wallet transaction
   extras             Additional encoding methods, used for testing and debugging.
   help               Help about any command
 
@@ -106,7 +106,7 @@ Storage indexes can be enabled using the following flags:
 - `--contract <address>` An instance of the `decompressor.huff` contract to use for storage indexes.
 - `--provider <provider>` The provider from which to fetch the pointers.
 
-Notice that a cache on `/tmp/czip-indexes-<chain-id>.json` is automatically created to avoid fetching the same pointers multiple times.
+Notice that a cache on `/tmp/czip-cache/czip-indexes-<chain-id>.json` is automatically created to avoid fetching the same pointers multiple times. The cache dir can be changed using the `--cache-dir` flag.
 
 ### Example
 
@@ -118,6 +118,63 @@ Notice that a cache on `/tmp/czip-indexes-<chain-id>.json` is automatically crea
 ./compressor/bin/czip-compressor encode_call --provider https://nodes.sequence.app/arbitrum-nova --contract 0x963752cac40E583Dea143D6262e24f89c9E1F911 call 0xa9059cbb000000000000000000000000963752cac40e583dea143d6262e24f89c9e1f91100000000000000000000000000000000000000000000000000000000000003fc 0x750ba8b76187092B0D1E87E28daaf484d1b5273b --use-storage true
 
 > 0x0837012700020203fc270003
+```
+
+## Compression gains
+
+The compression gains are highly dependent on the ratio of computation cost to calldata cost of a given network. It is most effective on "rollup" style L2s, but it can also achieve some small gains on some other networks.
+
+| Network       | Decompressor Address                       | Savings  |
+|---------------|--------------------------------------------|----------|
+| Arbitrum      | 0x8C5CF0a201C1F0C1517a23699BE48070724e7a70 | ~50%     |
+| Optimism      | 0x8C5CF0a201C1F0C1517a23699BE48070724e7a70 | ~50%     |
+| Base          | 0x8C5CF0a201C1F0C1517a23699BE48070724e7a70 | ~50%     |
+| Arbitrum Nova | 0x8C5CF0a201C1F0C1517a23699BE48070724e7a70 | ~15%     |
+| Polygon       | --                                         | Negative |
+| Ethereum      | --                                         | Negative |
+| Polygon zkEVM | --                                         | Negative |
+
+The following benchmarking transactions are from the Arbitrum network, they show savings of ~50% in gas costs. The savings account for the cost of the decompressor contract, notice that they use an older version of the compressor, but the inner workings are the same.
+
+![Sending ETH cost comparation](https://ipfs.io/ipfs/QmbJ3rZRdUyie8bpF7tbDHK5acqU7ncigsNLqJvW6qZViu?filename=Compressed%20ETH%20transactions%20-%20Sequence%20wallet.svg)
+
+```
+Send ETH uncompressed (1st):
+0xa0efbb458309f1ccc14035a53e20c36155d722b1c5d991bfa7c43a21174ec468
+
+Send ETH compressed + write storage (1st):
+0x9a34d5787b0dd6fba248ebeb407d51526445b496f45f2b4f6ff1d56875f04f7c
+
+Send ETH compressed (1st):
+0x6197b0770cdb3efcdb252bf3932ff9964e3467906a7ac1de6361e2d9fe1bb84e
+
+Send ETH uncompressed (2nd):
+0x7b519df3f10a0e0ae507d6d18d775f1ed80e65c76df06e5632f402903cd9afb8
+
+Send ETH compressed + write storage (2nd):
+0x1680bae9b790bb54d522ebc033da92cb5261b73c27058767c55011957083ea41
+
+Send ETH compressed + write storage (2nd):
+0x1ccc93227065df0b9d6acc64504280ad7e55b5823b90111a0b6477c881291de4
+```
+
+![Sending ETH cost comparation](https://ipfs.io/ipfs/QmNXyKPgcba7a4bFAMzRsQS3GSgykSD2FkpD9Qpk2FE2oV?filename=Compressed%20ERC20%20transactions%20-%20Sequence%20wallet.svg)
+
+```
+Send ERC20 uncompressed:
+0x0559ea8161e9cfed3298091d1f7626fe551bd40a38d2ff65d2340a52203e582a
+
+Send ERC20 compressed + write storage:
+0xbbf1d0250c37155f2da1d72cc01ff68fb5ccd4b4834a4accf53caf9374e64e3b
+
+Send ERC20 compressed:
+0x07e3b4de0b2cd3c8c531e90f32afc7a5dc3691b399ae4ab33d833b3e10741d05
+
+Approve ERC20 uncompressed:
+0x03c5f3d5c5a556439215c751a0d84b838266e9ec2481f862a912943e1bc309d6
+
+Aprove ERC20 compressed:
+0x7186dcf623d6bf5436691d28c649215900c4c71c2061863b0388786e07299428
 ```
 
 ## Decompressor contract

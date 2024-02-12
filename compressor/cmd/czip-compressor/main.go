@@ -78,7 +78,7 @@ func useBuffer(method uint, cmd *cobra.Command) (*compressor.Buffer, error) {
 }
 
 var encodeAnyCmd = &cobra.Command{
-	Use:   "encode_any",
+	Use:   "encode-any",
 	Short: "Compress any calldata: <hex>",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -98,8 +98,8 @@ var encodeAnyCmd = &cobra.Command{
 
 func addEncodeCallsCommands(cmd *cobra.Command) {
 	encodeCallsCmd := &cobra.Command{
-		Use:   "encode_calls",
-		Short: "Compress a sequence of calls: <data> <to> <data> <to> ... <data> <to>",
+		Use:   "encode-calls",
+		Short: "Compress multiple calls to many contracts: <data> <to> <data> <to> ... <data> <to>",
 	}
 	encodeCallsCmd.AddCommand(&cobra.Command{
 		Use:   "decode",
@@ -159,7 +159,7 @@ func writeCallsForMethod(cmd *cobra.Command, method uint, args []string) {
 
 func addEncodeCallCommands(cmd *cobra.Command) {
 	encodeCallCmd := &cobra.Command{
-		Use:   "encode_call",
+		Use:   "encode-call",
 		Short: "Compress a call to a contract: <data> <to>",
 	}
 	encodeCallCmd.AddCommand(&cobra.Command{
@@ -211,8 +211,8 @@ func writeCallForMethod(cmd *cobra.Command, method uint, args []string) {
 
 func addEncodeSequenceCommands(cmd *cobra.Command) {
 	encodeSequenceCmd := &cobra.Command{
-		Use:   "encode_sequence_tx",
-		Short: "Compress a sequence of transactions",
+		Use:   "encode-sequence-tx",
+		Short: "Compress a Sequence Wallet transaction",
 	}
 	encodeSequenceCmd.AddCommand(&cobra.Command{
 		Use:   "decode",

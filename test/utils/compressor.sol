@@ -12,7 +12,7 @@ library Compressor {
   function encodeAny(Vm _vm, bytes memory _data) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](3);
     inputs[0] = "./compressor/bin/czip-compressor";
-    inputs[1] = "encode_any";
+    inputs[1] = "encode-any";
     inputs[2] = _vm.toString(_data);
     return CommandBuffer(_vm, inputs);
   }
@@ -29,7 +29,7 @@ library Compressor {
   function encodeSequenceTx(Vm _vm, string memory _action, address _wallet, bytes memory _data) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](5);
     inputs[0] = "./compressor/bin/czip-compressor";
-    inputs[1] = "encode_sequence_tx";
+    inputs[1] = "encode-sequence-tx";
     inputs[2] = _action;
     inputs[3] = _vm.toString(_data);
     inputs[4] = _vm.toString(_wallet);
@@ -39,7 +39,7 @@ library Compressor {
   function encodeCall(Vm _vm, string memory _action, address _wallet, bytes memory _data) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](5);
     inputs[0] = "./compressor/bin/czip-compressor";
-    inputs[1] = "encode_call";
+    inputs[1] = "encode-call";
     inputs[2] = _action;
     inputs[3] = _vm.toString(_data);
     inputs[4] = _vm.toString(_wallet);
@@ -54,7 +54,7 @@ library Compressor {
   function encodeCalls(Vm _vm, string memory _action, Call[] memory _calls) internal pure returns (CommandBuffer memory) {
     string[] memory inputs = new string[](3 + _calls.length * 2);
     inputs[0] = "./compressor/bin/czip-compressor";
-    inputs[1] = "encode_calls";
+    inputs[1] = "encode-calls";
     inputs[2] = _action;
 
     for (uint i = 0; i < _calls.length; i++) {
