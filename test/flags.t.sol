@@ -137,25 +137,24 @@ contract FlagsTest is Test {
   }
 
   function test_abiEncode1(bytes4 _selector, bytes32 _param1) external {
-    vm.assume(_param1 != bytes32(0));
     bytes memory data = abi.encodePacked(_selector, _param1);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
+      .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
   }
 
   function test_abiEncode2(bytes4 _selector, bytes32 _param1, bytes32 _param2) external {
-    vm.assume(_param1 != bytes32(0));
-    vm.assume(_param2 != bytes32(0));
     bytes memory data = abi.encodePacked(_selector, _param1, _param2);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
+      .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
@@ -167,14 +166,12 @@ contract FlagsTest is Test {
     bytes32 _param2,
     bytes32 _param3
   ) external {
-    vm.assume(_param1 != bytes32(0));
-    vm.assume(_param2 != bytes32(0));
-    vm.assume(_param3 != bytes32(0));
     bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
+      .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
@@ -187,15 +184,12 @@ contract FlagsTest is Test {
     bytes32 _param3,
     bytes32 _param4
   ) external {
-    vm.assume(_param1 != bytes32(0));
-    vm.assume(_param2 != bytes32(0));
-    vm.assume(_param3 != bytes32(0));
-    vm.assume(_param4 != bytes32(0));
     bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3, _param4);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
+      .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
@@ -209,16 +203,12 @@ contract FlagsTest is Test {
     bytes32 _param4,
     bytes32 _param5
   ) external {
-    vm.assume(_param1 != bytes32(0));
-    vm.assume(_param2 != bytes32(0));
-    vm.assume(_param3 != bytes32(0));
-    vm.assume(_param4 != bytes32(0));
-    vm.assume(_param5 != bytes32(0));
-    bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3, _param4);
+    bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3, _param4, _param5);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
+      .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
@@ -233,17 +223,12 @@ contract FlagsTest is Test {
     bytes32 _param5,
     bytes32 _param6
   ) external {
-    vm.assume(_param1 != bytes32(0));
-    vm.assume(_param2 != bytes32(0));
-    vm.assume(_param3 != bytes32(0));
-    vm.assume(_param4 != bytes32(0));
-    vm.assume(_param5 != bytes32(0));
-    vm.assume(_param6 != bytes32(0));
-    bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3, _param4);
+    bytes memory data = abi.encodePacked(_selector, _param1, _param2, _param3, _param4, _param5, _param6);
     bytes memory encoded = vm.encodeAny(data)
       .useStorage(false)
       .allowOps("FLAG_ABI_0_PARAM")
       .allowOps("FLAG_READ_WORD")
+      .allowOps("LITERAL_ZERO")
       .run();
     bytes memory decoded = decompressor.call(encoded);
     assertEq(data, decoded);
