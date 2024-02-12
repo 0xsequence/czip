@@ -17,10 +17,10 @@ TODO
 
 The compressor has the following commands:
 
-- `encode_call <decode/call/call-return> <hex_data> <addr>` Compresses a call to `addr` with `hex_data`.
-- `encode_calls <decode/call> <hex_data_1> <addr_1> <hex_data_2> <addr_2> ...` Compresses multiple calls into one payload.
-- `encode_any <data>` Encodes any data into a compressed representation.
-- `encode_sequence_tx <decode/call> <sequence_tx> <sequence_wallet>` Compresses a Sequence wallet transaction.
+- `encode-call <decode/call/call-return> <hex_data> <addr>` Compresses a call to `addr` with `hex_data`.
+- `encode-calls <decode/call> <hex_data_1> <addr_1> <hex_data_2> <addr_2> ...` Compresses multiple calls into one payload.
+- `encode-any <data>` Encodes any data into a compressed representation.
+- `encode-sequence-tx <decode/call> <sequence_tx> <sequence_wallet>` Compresses a Sequence wallet transaction.
 
 ```
 czip-compressor is a tool for compressing Ethereum calldata. The compressed data can be decompressed using the decompressor contract.
