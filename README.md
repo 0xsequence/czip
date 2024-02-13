@@ -285,7 +285,7 @@ The operations are:
 | `0x27`          | `READ_ADDRESS_2` | <u16: pointer> | Reads an address from the respository into the buffer, it uses 2 bytes for the pointer. |
 | `0x28`          | `READ_ADDRESS_3` | <u24: pointer> | Reads an address from the respository into the buffer, it uses 3 bytes for the pointer. |
 | `0x29`          | `READ_ADDRESS_4` | <u32: pointer> | Reads an address from the respository into the buffer, it uses 4 bytes for the pointer. |
-| `0x2a`          | `WRITE_BYTES32`  | <u256: bytes32> | Saves a bytes32 on the respository, it writes the value to the buffer. |
+| `0x2a`          | `SAVE_BYTES32`  | <u256: bytes32> | Saves a bytes32 on the respository, it writes the value to the buffer. |
 | `0x2b`          | `READ_BYTES32_2` | <u16: pointer> | Reads a bytes32 from the respository into the buffer, it uses 2 bytes for the pointer. |
 | `0x2c`          | `READ_BYTES32_3` | <u24: pointer> | Reads a bytes32 from the respository into the buffer, it uses 3 bytes for the pointer. |
 | `0x2d`          | `READ_BYTES32_4` | <u32: pointer> | Reads a bytes32 from the respository into the buffer, it uses 4 bytes for the pointer. |
