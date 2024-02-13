@@ -337,7 +337,7 @@ Because it didn't occur to me. The opcode set has a lot of room left for new ope
 
 ### Why `callvalue` and not `push0`?
 
-I wanted to support all networks with the same code, and there is no reason to be sending funds to the decompressor contract. Notice that the behavior if `msg.value != 0` is undefined, so you have been warned.
+I wanted to support all networks with the same code, and there is no reason to be sending funds to the decompressor contract. Notice that the behavior if `msg.value != 0` is undefined, expect the decompresor to fail if `msg.value != 0`.
 
 ### Why not a built-in list of common contracts too?
 
@@ -349,11 +349,11 @@ Yes! The decompressor has the `0x05` "function" that allows you to fetch any sto
 
 ### Has this been audited?
 
-No.
+No, but it can still be used safely. See the next question.
 
 ### How should I use this in my project?
 
-The contract is quite big and could have vulnerabilities, so I would not recommend "trusting" it in your setup. However, you can use it as long as it acts as a "router" or "entrypoint" to some other contract that validates the data.
+The contract is quite big and could have vulnerabilities, so I would not recommend "trusting" it in your setup. However, you can use it as long as it acts as a "router" or "entrypoint" to some other contract that validates the data, just make sure to have an alternative path for uncompressed data.
 
 ---
 
