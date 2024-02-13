@@ -43,7 +43,7 @@ release:
 
     ## Build from source
     ```
-    $ go install github.com/0xsequence/czip/cmd/czip-compressor
+    $ go install github.com/0xsequence/czip/cmd/czip-compressor@latest
     ```
 
     ## Download binaries
@@ -59,7 +59,7 @@ brews:
   - name: czip-compressor
     ids:
       - czip-compressor
-    tap:
+    repository:
       owner: 0xsequence
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
@@ -69,4 +69,4 @@ brews:
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     homepage: "https://github.com/0xsequence/czip"
     description: "czip: EVM Calldata Zip"
-    license: "MIT"
+    license: "Apache-2.0"
