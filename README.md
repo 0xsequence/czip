@@ -202,39 +202,39 @@ The following benchmarking transactions are from the Arbitrum network, they show
 
 ![Sending ETH cost comparation](https://ipfs.io/ipfs/QmbJ3rZRdUyie8bpF7tbDHK5acqU7ncigsNLqJvW6qZViu?filename=Compressed%20ETH%20transactions%20-%20Sequence%20wallet.svg)
 
-Send ETH uncompressed (1st):
+Send ETH uncompressed (1st):<br>
 [0xa0efbb458309f1ccc14035a53e20c36155d722b1c5d991bfa7c43a21174ec468](https://arbiscan.io/tx/0xa0efbb458309f1ccc14035a53e20c36155d722b1c5d991bfa7c43a21174ec468)
 
-Send ETH compressed + write storage (1st):
+Send ETH compressed + write storage (1st):<br>
 [0x9a34d5787b0dd6fba248ebeb407d51526445b496f45f2b4f6ff1d56875f04f7c](https://arbiscan.io/tx/0x9a34d5787b0dd6fba248ebeb407d51526445b496f45f2b4f6ff1d56875f04f7c)
 
-Send ETH compressed (1st):
+Send ETH compressed (1st):<br>
 [0x6197b0770cdb3efcdb252bf3932ff9964e3467906a7ac1de6361e2d9fe1bb84e](https://arbiscan.io/tx/0x6197b0770cdb3efcdb252bf3932ff9964e3467906a7ac1de6361e2d9fe1bb84e)
 
-Send ETH uncompressed (2nd):
+Send ETH uncompressed (2nd):<br>
 [0x7b519df3f10a0e0ae507d6d18d775f1ed80e65c76df06e5632f402903cd9afb8](https://arbiscan.io/tx/0x7b519df3f10a0e0ae507d6d18d775f1ed80e65c76df06e5632f402903cd9afb8)
 
-Send ETH compressed + write storage (2nd):
+Send ETH compressed + write storage (2nd):<br>
 [0x1680bae9b790bb54d522ebc033da92cb5261b73c27058767c55011957083ea41](https://arbiscan.io/tx/0x1680bae9b790bb54d522ebc033da92cb5261b73c27058767c55011957083ea41)
 
-Send ETH compressed + write storage (2nd):
+Send ETH compressed + write storage (2nd):<br>
 [0x1ccc93227065df0b9d6acc64504280ad7e55b5823b90111a0b6477c881291de4](https://arbiscan.io/tx/0x1ccc93227065df0b9d6acc64504280ad7e55b5823b90111a0b6477c881291de4)
 
 ![Sending ETH cost comparation](https://ipfs.io/ipfs/QmNXyKPgcba7a4bFAMzRsQS3GSgykSD2FkpD9Qpk2FE2oV?filename=Compressed%20ERC20%20transactions%20-%20Sequence%20wallet.svg)
 
-Send ERC20 uncompressed:
+Send ERC20 uncompressed:<br>
 [0x0559ea8161e9cfed3298091d1f7626fe551bd40a38d2ff65d2340a52203e582a](https://arbiscan.io/tx/0x0559ea8161e9cfed3298091d1f7626fe551bd40a38d2ff65d2340a52203e582a)
 
-Send ERC20 compressed + write storage:
+Send ERC20 compressed + write storage:<br>
 [0xbbf1d0250c37155f2da1d72cc01ff68fb5ccd4b4834a4accf53caf9374e64e3b](https://arbiscan.io/tx/0xbbf1d0250c37155f2da1d72cc01ff68fb5ccd4b4834a4accf53caf9374e64e3b)
 
-Send ERC20 compressed:
+Send ERC20 compressed:<br>
 [0x07e3b4de0b2cd3c8c531e90f32afc7a5dc3691b399ae4ab33d833b3e10741d05](https://arbiscan.io/tx/0x07e3b4de0b2cd3c8c531e90f32afc7a5dc3691b399ae4ab33d833b3e10741d05)
 
-Approve ERC20 uncompressed:
+Approve ERC20 uncompressed:<br>
 [0x03c5f3d5c5a556439215c751a0d84b838266e9ec2481f862a912943e1bc309d6](https://arbiscan.io/tx/0x03c5f3d5c5a556439215c751a0d84b838266e9ec2481f862a912943e1bc309d6)
 
-Aprove ERC20 compressed:
+Aprove ERC20 compressed:<br>
 [0x7186dcf623d6bf5436691d28c649215900c4c71c2061863b0388786e07299428](https://arbiscan.io/tx/0x7186dcf623d6bf5436691d28c649215900c4c71c2061863b0388786e07299428)
 
 ## Decompressor contract
