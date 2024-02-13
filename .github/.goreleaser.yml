@@ -9,7 +9,6 @@ builds:
     goos:
       - darwin
       - linux
-      - windows
     goarch:
       - amd64
       - arm64
@@ -50,7 +49,6 @@ release:
     ## Download binaries
     macOS: [amd64](https://github.com/0xsequence/czip/releases/download/v{{.Version}}/czip-compressor.darwin-amd64), [arm64](https://github.com/0xsequence/czip/releases/download/v{{.Version}}/czip-compressor.darwin-arm64) (Apple Silicon)
     Linux: [amd64](https://github.com/0xsequence/czip/releases/download/v{{.Version}}/czip-compressor.linux-amd64), [arm64](https://github.com/0xsequence/czip/releases/download/v{{.Version}}/czip-compressor.linux-arm64)
-    Windows: [amd64](https://github.com/0xsequence/czip/releases/download/v{{.Version}}/czip-compressor.windows-amd64.exe), [arm64](https://github.com/0xsequence/czip/releases/download/v{{.Version}}/czip-compressor.windows-arm64.exe)
 
 changelog:
   use: github
