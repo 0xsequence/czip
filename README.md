@@ -11,7 +11,20 @@ A companion `czip-compressor` tool is provided to compress calldata. It is a sim
 
 ## Install
 
-TODO
+```
+$ brew tap 0xsequence/tap
+$ brew install czip-compressor
+$ czip-compressor
+```
+
+or
+
+`$ docker run ghcr.io/0xsequence/czip-compressor`
+
+or
+
+`$ go install github.com/0xsequence/czip/compressor/cmd/czip-compressor@latest`
+
 
 ## Usage
 
