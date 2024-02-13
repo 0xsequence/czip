@@ -3,7 +3,8 @@ project_name: czip
 
 builds:
   - id: czip-compressor
-    main: ./compressor/cmd/czip-compressor
+    dir: ./compressor
+    main: ./cmd/czip-compressor
     binary: czip-compressor
     goos:
       - darwin
