@@ -23,7 +23,7 @@ build-czip-compressor:
 	@cd compressor; make build
 
 build-decompressor:
-	@huffc ./src/decompressor.huff -e paris -b > ./build/decompressor
+	@mkdir -p build; huffc ./src/decompressor.huff -e paris -b > ./build/decompressor
 
 test: build-czip-compressor
 	@forge test
