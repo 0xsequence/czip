@@ -5,20 +5,20 @@
 #include "./state_machine.huff"
 
 #define jumptable SELECTORS_TABLE {
-  execute_transaction          // 0x00
-  execute_many_transactions    // 0x01
-  read_address                 // 0x02
-  read_bytes32                 // 0x03
-  sizes                        // 0x04
-  read_storage_slots           // 0x05
-  decompress_transaction       // 0x06
-  decompress_many_transactions // 0x07
-  execute_call                 // 0x08
-  execute_call_return          // 0x09
-  execute_many_calls           // 0x0a
-  decode_call                  // 0x0b
-  decode_many_calls            // 0x0c
-  decode_any                   // 0x0d
+  EXECUTE_SEQUENCE_TRANSACTION  // 0x00
+  EXECUTE_SEQUENCE_TRANSACTIONS // 0x01
+  READ_ADDRESS                  // 0x02
+  READ_BYTES32                  // 0x03
+  INDEX_SIZES                   // 0x04
+  READ_STORAGE_SLOTS            // 0x05
+  DECODE_SEQUENCE_TRANSACTION   // 0x06
+  DECODE_SEQUENCE_TRANSACTIONS  // 0x07
+  EXECUTE_CALL                  // 0x08
+  EXECUTE_CALL_RETURN           // 0x09
+  EXECUTE_CALLS                 // 0x0a
+  DECODE_CALL                   // 0x0b
+  DECODE_CALLS                  // 0x0c
+  DECODE_ANY                    // 0x0d
 }
 
 #define macro MAIN() = takes (0) returns (0) {
@@ -41,49 +41,49 @@
   mload                          // [mload[method]]
   jump                           // []
 
-  execute_transaction:
+  EXECUTE_SEQUENCE_TRANSACTION:
     0x01                         // [rindex]
     PERFORM_EXECUTE(nrfs)        // [rindex]
     callvalue callvalue return
 
-  execute_many_transactions:
+  EXECUTE_SEQUENCE_TRANSACTIONS:
     0x01                         // [rindex]
     PERFORM_MANY_EXECUTES(nrfs)  // [rindex, size, i]
     callvalue callvalue return
 
-  read_address:
+  READ_ADDRESS:
     PERFORM_READ_ADDRESS()
     0x20 callvalue return
 
-  read_bytes32:
+  READ_BYTES32:
     PERFORM_READ_BYTES32()
     0x20 callvalue return
 
-  sizes:
+  INDEX_SIZES:
     PERFORM_READ_SIZES()
     0x20 callvalue return
 
-  read_storage_slots:
+  READ_STORAGE_SLOTS:
     PERFORM_READ_SLOTS()            // [size]
     callvalue                       // [0x00, size]
     return
 
-  decompress_transaction:
+  DECODE_SEQUENCE_TRANSACTION:
     PRE_DECODE_ONLY()               // [windex, rindex]
     DECODE_FULL_EXECUTE(nrfs)       // [windex, rindex]
     POST_DECODE_ONLY()
 
-  decompress_many_transactions:
+  DECODE_SEQUENCE_TRANSACTIONS:
     PRE_DECODE_ONLY()               // [windex, rindex]
     DECODE_MANY_FULL_EXECUTES(nrfs) // [windex, rindex]
     POST_DECODE_ONLY()
 
-  execute_call:
+  EXECUTE_CALL:
     0x01                       // [rindex]
     PERFORM_CALL(nrfs)         // [rindex]
     callvalue callvalue return
 
-  execute_call_return:
+  EXECUTE_CALL_RETURN:
     0x01                       // [rindex]
     PERFORM_CALL(nrfs)         // [rindex]
 
@@ -94,22 +94,22 @@
 
     returndatasize callvalue return
 
-  execute_many_calls:
+  EXECUTE_CALLS:
     0x01                       // [rindex]
     PERFORM_MANY_CALLS(nrfs)   // [rindex, size, i]
     callvalue callvalue return
   
-  decode_call:
+  DECODE_CALL:
     PRE_DECODE_ONLY()       // [windex, rindex]
     DECODE_CALL(nrfs)       // [windex, rindex]
     POST_DECODE_ONLY()
 
-  decode_many_calls:
+  DECODE_CALLS:
     PRE_DECODE_ONLY()       // [windex, rindex]
     DECODE_MANY_CALLS(nrfs) // [windex, rindex]
     POST_DECODE_ONLY()
 
-  decode_any:
+  DECODE_ANY:
     PRE_DECODE_ONLY()       // [windex, rindex]
     DECODE_ANY(nrfs)        // [windex, rindex]
     POST_DECODE_ONLY()
