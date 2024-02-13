@@ -202,6 +202,8 @@ The following benchmarking transactions are from the Arbitrum network, they show
 
 ![Sending ETH cost comparation](https://ipfs.io/ipfs/QmbJ3rZRdUyie8bpF7tbDHK5acqU7ncigsNLqJvW6qZViu?filename=Compressed%20ETH%20transactions%20-%20Sequence%20wallet.svg)
 
+The transaction cost for sending ETH using a smart contract wallet, with a 2/2 configuration, goes from **0.76 USD** to **0.38 USD**.
+
 Send ETH uncompressed (1st):<br>
 [0xa0efbb458309f1ccc14035a53e20c36155d722b1c5d991bfa7c43a21174ec468](https://arbiscan.io/tx/0xa0efbb458309f1ccc14035a53e20c36155d722b1c5d991bfa7c43a21174ec468)
 
@@ -217,10 +219,12 @@ Send ETH uncompressed (2nd):<br>
 Send ETH compressed + write storage (2nd):<br>
 [0x1680bae9b790bb54d522ebc033da92cb5261b73c27058767c55011957083ea41](https://arbiscan.io/tx/0x1680bae9b790bb54d522ebc033da92cb5261b73c27058767c55011957083ea41)
 
-Send ETH compressed + write storage (2nd):<br>
+Send ETH compressed (2nd):<br>
 [0x1ccc93227065df0b9d6acc64504280ad7e55b5823b90111a0b6477c881291de4](https://arbiscan.io/tx/0x1ccc93227065df0b9d6acc64504280ad7e55b5823b90111a0b6477c881291de4)
 
-![Sending ETH cost comparation](https://ipfs.io/ipfs/QmNXyKPgcba7a4bFAMzRsQS3GSgykSD2FkpD9Qpk2FE2oV?filename=Compressed%20ERC20%20transactions%20-%20Sequence%20wallet.svg)
+![Sending ERC20 cost comparation](https://ipfs.io/ipfs/QmNXyKPgcba7a4bFAMzRsQS3GSgykSD2FkpD9Qpk2FE2oV?filename=Compressed%20ERC20%20transactions%20-%20Sequence%20wallet.svg)
+
+The transaction cost of sending ERC20 tokens using a smart contract wallet, with a 2/2 configuration, goes from **0.69 USD** to **0.31 USD**.
 
 Send ERC20 uncompressed:<br>
 [0x0559ea8161e9cfed3298091d1f7626fe551bd40a38d2ff65d2340a52203e582a](https://arbiscan.io/tx/0x0559ea8161e9cfed3298091d1f7626fe551bd40a38d2ff65d2340a52203e582a)
