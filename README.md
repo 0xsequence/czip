@@ -58,7 +58,9 @@ It encodes a single call to a contract, the subcommands are:
 - `call-return` Generates a payload that, when sent to the `decompressor.huff` contract, will decompress the calldata and perform the call, returning the return value.
 
 ```cmd
-czip-compressor encode-call decode 0xa9059cbb0000000000000000000000008bf74fb902cdad5d2d8ca0d3bbc7bb16894b9c350000000000000000000000000000000000000000000000000000000006052340 0xdAC17F958D2ee523a2206206994597C13D831ec7
+czip-compressor encode-call decode \
+0xa9059cbb0000000000000000000000008bf74fb902cdad5d2d8ca0d3bbc7bb16894b9c350000000000000000000000000000000000000000000000000000000006052340 \
+0xdAC17F958D2ee523a2206206994597C13D831ec7
 
 > 0x0b3701148bf74fb902cdad5d2d8ca0d3bbc7bb16894b9c35332bf214dac17f958d2ee523a2206206994597c13d831ec7
 ```
@@ -73,7 +75,11 @@ It encodes multiple calls to contracts, the subcommands are:
 Notice that the `call-return` subcommand is not available in this mode.
 
 ```cmd
-czip-compressor encode-calls decode 0xa9059cbb0000000000000000000000009813d80d0686406b79c29b2b8a672a13725facb300000000000000000000000000000000000000000000000ae56f730e6d840000 0xdac17f958d2ee523a2206206994597c13d831ec7 0x095ea7b30000000000000000000000007c56be0ad3128acc33190484cd1badebc8c76240ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff 0xdac17f958d2ee523a2206206994597c13d831ec7
+czip-compressor encode-calls decode \
+  0xa9059cbb0000000000000000000000009813d80d0686406b79c29b2b8a672a13725facb300000000000000000000000000000000000000000000000ae56f730e6d840000 \
+  0xdac17f958d2ee523a2206206994597c13d831ec7 \
+  0x095ea7b30000000000000000000000007c56be0ad3128acc33190484cd1badebc8c76240ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff \
+  0xdac17f958d2ee523a2206206994597c13d831ec7
 
 > 0x0c023701149813d80d0686406b79c29b2b8a672a13725facb3338fda14dac17f958d2ee523a2206206994597c13d831ec73702147c56be0ad3128acc33190484cd1badebc8c7624031ff3d001c
 ```
@@ -85,7 +91,8 @@ czip-compressor encode-calls decode 0xa9059cbb0000000000000000000000009813d80d06
 It encodes any data into a compressed representation. Sending the payload to the `decompressor.huff` contract will return the original data.
 
 ```cmd
-czip-compressor encode-any 0x0000000000000000000000000000000000000000000000012a5f58168ee60000
+czip-compressor encode-any \
+  0x0000000000000000000000000000000000000000000000012a5f58168ee60000
 
 > 0x0d3388d7
 ```
@@ -109,16 +116,60 @@ Notice that a cache on `/tmp/czip-cache/czip-indexes-<chain-id>.json` is automat
 ### Example
 
 ```cmd
-czip-compressor encode-call call 0xa9059cbb000000000000000000000000963752cac40e583dea143d6262e24f89c9e1f91100000000000000000000000000000000000000000000000000000000000003fc 0x750ba8b76187092B0D1E87E28daaf484d1b5273b
+czip-compressor encode-call decode \
+  0xa9059cbb000000000000000000000000963752cac40e583dea143d6262e24f89c9e1f91100000000000000000000000000000000000000000000000000000000000003fc \
+  0x750ba8b76187092B0D1E87E28daaf484d1b5273b
 
-> 0x08370114963752cac40e583dea143d6262e24f89c9e1f9110203fc14750ba8b76187092b0d1e87e28daaf484d1b5273b
+> 0x0b370114963752cac40e583dea143d6262e24f89c9e1f9110203fc14750ba8b76187092b0d1e87e28daaf484d1b5273b
 
-czip-compressor encode-call call --contract 0x8C5CF0a201C1F0C1517a23699BE48070724e7a70 --provider https://nodes.sequence.app/arbitrum-nova --use-storage 0xa9059cbb000000000000000000000000963752cac40e583dea143d6262e24f89c9e1f91100000000000000000000000000000000000000000000000000000000000003fc 0x750ba8b76187092B0D1E87E28daaf484d1b5273b
+czip-compressor encode-call decode \
+  --contract 0x8C5CF0a201C1F0C1517a23699BE48070724e7a70 \
+  --provider https://nodes.sequence.app/arbitrum-nova \
+  --use-storage \
+  0xa9059cbb000000000000000000000000963752cac40e583dea143d6262e24f89c9e1f91100000000000000000000000000000000000000000000000000000000000003fc \
+  0x750ba8b76187092B0D1E87E28daaf484d1b5273b
 
-> 0x0837012700010203fc270002
+> 0x0b37012700010203fc270002
 ```
 
 See it in action: https://nova.arbiscan.io/tx/0x86e7b4177c0d219a87cc58f93ae2ecf2f490a719119c283f61cdc88585cc7c7b
+
+## How to decompress
+
+Sending the generated payload to the `decompressor.huff` will either return the decompressed data or perform the call (depending on the command used to generate the payload).
+
+The `decompressor.huff` contract has no selectors; the data does not need to be re-encoded and can be sent directly to the contract.
+
+### Cast example
+
+Try running the following command; it will inflate the data and return the original call data. You can do the same thing on-chain.
+
+```cmd
+cast call \
+  --rpc-url https://nodes.sequence.app/arbitrum-nova \
+  0x8C5CF0a201C1F0C1517a23699BE48070724e7a70 \
+  0x0b37012700010203fc270002
+
+> 0xa9059cbb000000000000000000000000963752cac40e583dea143d6262e24f89c9e1f91100000000000000000000000000000000000000000000000000000000000003fc000000000000000000000000750ba8b76187092b0d1e87e28daaf484d1b5273b
+```
+
+### Solidity example
+
+Decompressing on-chain is as simple as calling the decompressor contract with the payload.
+
+```solidity
+contract YourContract {
+  event WeGotData(bytes data);
+
+  function doSomething(bytes calldata _compressed) external {
+    (bool ok, bytes memory data) = address(0x8C5CF0a201C1F0C1517a23699BE48070724e7a70).call(_compressed);
+    require(ok, "Decompression failed");
+    emit WeGotData(data);
+  }
+}
+```
+
+Notice that if the data was compressed using the `call` command, the compressor will not return the decompressed data; it will perform the call. In this example, we used the `decode` command, so the data will be returned.
 
 ## Compression gains
 
