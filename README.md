@@ -3,7 +3,7 @@ CZIP: EVM Calldata Zip
 
 ![CZIP 😈](./logo.png)
 
-**czip** is a utility for compressing and decompressing EVM calldata. It is designed to be used in L2s to trade off calldata size for computation cost.
+**czip** is an engine for compressing and decompressing EVM calldata. It is designed to be used in L2s to trade off calldata size for computation cost.
 
 The primary component of czip is the `decompressor.huff` contract, which is a Huff contract that inflates the calldata. It works by implementing a simple state machine that, in a single pass, decompresses the input. The operations of the state machine are specifically designed to work with EVM calldata.
 
@@ -200,7 +200,7 @@ The compression gains are highly dependent on the ratio of computation cost to c
 
 The following benchmarking transactions are from the Arbitrum network, they show savings of ~50% in gas costs. The savings account for the cost of the decompressor contract, notice that they use an older version of the compressor, but the inner workings are the same.
 
-![Sending ETH cost comparation](https://ipfs.io/ipfs/QmbJ3rZRdUyie8bpF7tbDHK5acqU7ncigsNLqJvW6qZViu?filename=Compressed%20ETH%20transactions%20-%20Sequence%20wallet.svg)
+![Sending ETH cost comparison](https://ipfs.io/ipfs/QmbJ3rZRdUyie8bpF7tbDHK5acqU7ncigsNLqJvW6qZViu?filename=Compressed%20ETH%20transactions%20-%20Sequence%20wallet.svg)
 
 The transaction cost for sending ETH using a smart contract wallet, with a 2/2 configuration, goes from **0.76 USD** to **0.38 USD**.
 
@@ -222,7 +222,7 @@ Send ETH compressed + write storage (2nd):<br>
 Send ETH compressed (2nd):<br>
 [0x1ccc93227065df0b9d6acc64504280ad7e55b5823b90111a0b6477c881291de4](https://arbiscan.io/tx/0x1ccc93227065df0b9d6acc64504280ad7e55b5823b90111a0b6477c881291de4)
 
-![Sending ERC20 cost comparation](https://ipfs.io/ipfs/QmNXyKPgcba7a4bFAMzRsQS3GSgykSD2FkpD9Qpk2FE2oV?filename=Compressed%20ERC20%20transactions%20-%20Sequence%20wallet.svg)
+![Sending ERC20 cost comparison](https://ipfs.io/ipfs/QmNXyKPgcba7a4bFAMzRsQS3GSgykSD2FkpD9Qpk2FE2oV?filename=Compressed%20ERC20%20transactions%20-%20Sequence%20wallet.svg)
 
 The transaction cost of sending ERC20 tokens using a smart contract wallet, with a 2/2 configuration, goes from **0.69 USD** to **0.31 USD**.
 
@@ -238,7 +238,7 @@ Send ERC20 compressed:<br>
 Approve ERC20 uncompressed:<br>
 [0x03c5f3d5c5a556439215c751a0d84b838266e9ec2481f862a912943e1bc309d6](https://arbiscan.io/tx/0x03c5f3d5c5a556439215c751a0d84b838266e9ec2481f862a912943e1bc309d6)
 
-Aprove ERC20 compressed:<br>
+Approve ERC20 compressed:<br>
 [0x7186dcf623d6bf5436691d28c649215900c4c71c2061863b0388786e07299428](https://arbiscan.io/tx/0x7186dcf623d6bf5436691d28c649215900c4c71c2061863b0388786e07299428)
 
 ## Decompressor contract
@@ -282,13 +282,13 @@ The operations are:
 | `0x24`          | `NESTED_FLAGS_S` | <u8: len> <...op>   | Executes N operations (max 255). |
 | `0x25`          | `NESTED_FLAGS_L` | <u16: len> <...op>   | Executes N operations. |
 | `0x26`          | `SAVE_ADDRESS`  | <u160: addr> | Saves an address on the repository, it writes the address to the buffer (padding to 32 bytes). |
-| `0x27`          | `READ_ADDRESS_2` | <u16: pointer> | Reads an address from the respository into the buffer, it uses 2 bytes for the pointer. |
-| `0x28`          | `READ_ADDRESS_3` | <u24: pointer> | Reads an address from the respository into the buffer, it uses 3 bytes for the pointer. |
-| `0x29`          | `READ_ADDRESS_4` | <u32: pointer> | Reads an address from the respository into the buffer, it uses 4 bytes for the pointer. |
-| `0x2a`          | `WRITE_BYTES32`  | <u256: bytes32> | Saves a bytes32 on the respository, it writes the value to the buffer. |
-| `0x2b`          | `READ_BYTES32_2` | <u16: pointer> | Reads a bytes32 from the respository into the buffer, it uses 2 bytes for the pointer. |
-| `0x2c`          | `READ_BYTES32_3` | <u24: pointer> | Reads a bytes32 from the respository into the buffer, it uses 3 bytes for the pointer. |
-| `0x2d`          | `READ_BYTES32_4` | <u32: pointer> | Reads a bytes32 from the respository into the buffer, it uses 4 bytes for the pointer. |
+| `0x27`          | `READ_ADDRESS_2` | <u16: pointer> | Reads an address from the repository into the buffer, it uses 2 bytes for the pointer. |
+| `0x28`          | `READ_ADDRESS_3` | <u24: pointer> | Reads an address from the repository into the buffer, it uses 3 bytes for the pointer. |
+| `0x29`          | `READ_ADDRESS_4` | <u32: pointer> | Reads an address from the repository into the buffer, it uses 4 bytes for the pointer. |
+| `0x2a`          | `WRITE_BYTES32`  | <u256: bytes32> | Saves a bytes32 on the repository, it writes the value to the buffer. |
+| `0x2b`          | `READ_BYTES32_2` | <u16: pointer> | Reads a bytes32 from the repository into the buffer, it uses 2 bytes for the pointer. |
+| `0x2c`          | `READ_BYTES32_3` | <u24: pointer> | Reads a bytes32 from the repository into the buffer, it uses 3 bytes for the pointer. |
+| `0x2d`          | `READ_BYTES32_4` | <u32: pointer> | Reads a bytes32 from the repository into the buffer, it uses 4 bytes for the pointer. |
 | `0x2e`          | `READ_STORE_FLAG_S` | <u16: calldata_pointer> | Reads an "storage" flag, the pointer is absolute, it only writes the value to the buffer. |
 | `0x2f`          | `READ_STORE_FLAG_L` | <u24: calldata_pointer> | Reads an "storage" flag, the pointer is absolute, it only writes the value to the buffer. |
 | `0x30`          | `POW_2` | <u8: exponent> | Writes 2^N to the buffer, padded left to 32 bytes. |
@@ -312,7 +312,7 @@ The operations are:
 | `0x42`        | `SEQUENCE_EXECUTE` | View detail | Writes an ABI encoded Sequence transaction to the buffer. |
 | `0x43`        | `SEQUENCE_SELF_EXECUTE` | View detail | Writes an ABI encoded Sequence self execute transaction to the buffer. |
 | `0x44` | `SEQUENCE_SIGNATURE_W0` | <u8: weight> <bytes[66]: sig> | Writes a Sequence signature part to the buffer. |
-| `0x45` | `SEQUENCE_SIGNATURE_W1` | <bytes[66]: sig> | Writse a Sequence Signature part to the buffer, with static weight 1. |
+| `0x45` | `SEQUENCE_SIGNATURE_W1` | <bytes[66]: sig> | Writes a Sequence Signature part to the buffer, with static weight 1. |
 | `0x46` | `SEQUENCE_SIGNATURE_W2` | <bytes[66]: sig> | Writes a Sequence Signature part to the buffer, with static weight 2. |
 | `0x47` | `SEQUENCE_SIGNATURE_W3` | <bytes[66]: sig> | Writes a Sequence Signature part to the buffer, with static weight 3. |
 | `0x48` | `SEQUENCE_SIGNATURE_W4` | <bytes[66]: sig> | Writes a Sequence Signature part to the buffer, with static weight 4. |
