@@ -51,7 +51,7 @@ release:
     Linux: [amd64](https://github.com/0xsequence/czip/releases/download/v{{.Version}}/czip-compressor.linux-amd64), [arm64](https://github.com/0xsequence/czip/releases/download/v{{.Version}}/czip-compressor.linux-arm64)
 
 changelog:
-  use: github
+  use: github-native
   sort: asc
 
 brews:
